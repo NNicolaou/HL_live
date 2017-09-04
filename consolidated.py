@@ -25,7 +25,7 @@ def revenue_analysis(dic_data, input_dic):
     df.loc[:,'Net renewal income'] = _revenue['renewal_income']
     df.loc[:,'Management fees'] = _revenue['management_fee'] + _revenue['pms_advice']
     df.loc[:,'HL Fund AMC'] = _revenue['hlf_amc']
-    df.loc[:,'Stockbroking income'] = _revenue['stockbroking_commission'] + _revenue['stockbroking_income'] + _revenue['currency_revenue']
+    df.loc[:,'Stockbroking income'] = _revenue['stockbroking_commission'] + _revenue['stockbroking_income']
     df.loc[:,'Interest receivable'] = _revenue['interest_on_cash']
     df.loc[:,'Adviser charges'] = _revenue['advice_fee']
     df.loc[:,'Funds Library'] = _revenue['funds_library']
@@ -126,7 +126,7 @@ def get_nnb_compare(dic_data, input_dic, year=general.recent_end_year):
             year=year+1
         year = [year]
         
-    df = nnb_analysis(dic_data, input_dic).groupby(['financial_year','half_no']).sum()
+    df = nnb_analysis(dic_data, input_dic).groupby(['financial_year','quarter_no','half_no']).sum()
     return df.loc[idx[year,:],:]
 
 def get_aua_compare(dic_data, input_dic, year=general.recent_end_year):
