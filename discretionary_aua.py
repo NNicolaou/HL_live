@@ -11,12 +11,12 @@ import vantage_aua
 aua_frame = general.report_dic['aua'].loc[:,general.disc_known_cols]
 # general.set_values(col_names=general.disc_known_cols,values=general.disc_known_values,date = general.prev_financial_year_end,df=aua_frame)
 
-def append_share_class_units(dic_data):
+def append_share_class_units(dic_data,idx=general.temp_month_end):
     '''
     dic_data as a result of read_funds_data from data_accessing library
     '''
     for x, y, z in zip(['acc unit','inc unit'],['acc size', 'inc size'],['acc price','inc price']):
-        dic_data[x] = dic_data[y].reindex(index=general.month_end_series).divide(dic_data[z].reindex(index=general.month_end_series) /100)
+        dic_data[x] = dic_data[y].reindex(index=idx).divide(dic_data[z].reindex(index=idx) /100)
         dic_data[x].where(dic_data[y]!=0,0,inplace=True)
 
  
@@ -28,8 +28,8 @@ def get_composite_return(dic_data):
     acc_percent = dic_data['acc unit'] / (dic_data['acc unit'] + dic_data['inc unit'])
     inc_percent = dic_data['inc unit'] / (dic_data['acc unit'] + dic_data['inc unit'])
     
-    acc_percent = general.fillna_monthly(acc_percent)
-    inc_percent = general.fillna_monthly(inc_percent)
+    acc_percent = general.fillna_monthly(acc_percent).reindex(index=general.month_end_series)
+    inc_percent = general.fillna_monthly(inc_percent).reindex(index=general.month_end_series)
     #fund_size = dic_data['fund size'].reindex(index=general.month_end_series)
     #fund_size_percent = fund_size.div(fund_size.sum(axis='columns'), axis='index')
     
