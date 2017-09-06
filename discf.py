@@ -14,12 +14,13 @@ if general.last_result_month == 6:
     dcf_start_year = general.recent_end_year+1
 else:
     dcf_start_year = general.recent_end_year
-
+#===============================================Inputs=========================================================
 dcf_period = 9
 perpetuity_growth_rate = 0.0375  # Gordon growth rate - long term growth rate
 no_of_shares = 474720010
 net_debt_cash = 211000000.0
 discount_rate = 0.0825 # WACC - cost of equity
+#=============================================================================================================
 dcf_end_year = dcf_start_year + dcf_period - 1
 def disc_cash_flow(dic_data, input_dic):
     df1 = consolidated.annual_revenue_analysis(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]
