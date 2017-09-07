@@ -23,16 +23,28 @@ discount_rate = 0.0825 # WACC - cost of equity
 #=============================================================================================================
 dcf_end_year = dcf_start_year + dcf_period - 1
 def disc_cash_flow(dic_data, input_dic):
-    df1 = consolidated.annual_revenue_analysis(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]
-    df2 = consolidated.annual_costs_analysis(input_dic).loc[dcf_start_year:dcf_end_year,:]
-    ebit = df1['Total revenue']+revenue.annual_revenue(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]['currency_revenue']
-    dcf = ebit.to_frame(name='EBIT').transpose()
-    tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(index=dcf.columns).transpose()
-    dcf.loc['Tax',:] = dcf.loc['EBIT',:] * tax_rate.loc['Tax',:]
-    dcf.loc['EAT',:] = dcf.loc['EBIT',:] - dcf.loc['Tax',:]
-    dcf.loc['Depreciation',:] = costs.annual_costs(input_dic).loc[dcf_start_year:dcf_end_year,:]['depre_amort_financial'].abs()
-    dcf.loc['Capital Expenditure',:] = costs.annual_costs(input_dic).loc[dcf_start_year:dcf_end_year,:]['capital_expenditure'].abs()
-    dcf.loc['Free cash flow',:] = dcf.loc['EAT',:] + dcf.loc['Depreciation',:] - dcf.loc['Capital Expenditure',:]
+    if general.last_result_month == 6:
+        df1 = consolidated.annual_revenue_analysis(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]
+        df2 = consolidated.annual_costs_analysis(input_dic).loc[dcf_start_year:dcf_end_year,:]
+        ebit = df1['Total revenue']+revenue.annual_revenue(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic).loc[dcf_start_year:dcf_end_year,:]['currency_revenue'] 
+        dcf = ebit.to_frame(name='EBIT').transpose()
+        tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(index=dcf.columns).transpose()
+        dcf.loc['Tax',:] = dcf.loc['EBIT',:] * tax_rate.loc['Tax',:]
+        dcf.loc['EAT',:] = dcf.loc['EBIT',:] - dcf.loc['Tax',:]
+        dcf.loc['Depreciation',:] = costs.annual_costs(input_dic).loc[dcf_start_year:dcf_end_year,:]['depre_amort_financial'].abs()
+        dcf.loc['Capital Expenditure',:] = costs.annual_costs(input_dic).loc[dcf_start_year:dcf_end_year,:]['capital_expenditure'].abs()
+        dcf.loc['Free cash flow',:] = dcf.loc['EAT',:] + dcf.loc['Depreciation',:] - dcf.loc['Capital Expenditure',:]
+    else:
+        df1 = consolidated.annual_revenue_analysis(dic_data, input_dic, cal_year=True).loc[dcf_start_year:dcf_end_year,:]
+        df2 = consolidated.annual_costs_analysis(input_dic,cal_year=True).loc[dcf_start_year:dcf_end_year,:]
+        ebit = df1['Total revenue']+revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start_year:dcf_end_year,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start_year:dcf_end_year,:]['currency_revenue'] 
+        dcf = ebit.to_frame(name='EBIT').transpose()
+        tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(index=dcf.columns).transpose()
+        dcf.loc['Tax',:] = dcf.loc['EBIT',:] * tax_rate.loc['Tax',:]
+        dcf.loc['EAT',:] = dcf.loc['EBIT',:] - dcf.loc['Tax',:]
+        dcf.loc['Depreciation',:] = costs.annual_costs(input_dic,cal_year=True).loc[dcf_start_year:dcf_end_year,:]['depre_amort_financial'].abs()
+        dcf.loc['Capital Expenditure',:] = costs.annual_costs(input_dic,cal_year=True).loc[dcf_start_year:dcf_end_year,:]['capital_expenditure'].abs()
+        dcf.loc['Free cash flow',:] = dcf.loc['EAT',:] + dcf.loc['Depreciation',:] - dcf.loc['Capital Expenditure',:]
     
     s1 = pandas.Series(1, index=dcf.columns).cumsum()
     s2 = pandas.Series(1+discount_rate, index=dcf.columns)

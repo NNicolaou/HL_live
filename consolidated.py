@@ -33,12 +33,15 @@ def revenue_analysis(dic_data, input_dic):
     df.loc[:,'Total revenue'] = df.sum(axis='columns')
     return df
 
-def annual_revenue_analysis(dic_data, input_dic):
+def annual_revenue_analysis(dic_data, input_dic, cal_year=False):
     df = revenue_analysis(dic_data, input_dic)
-    if general.last_result_month == 6:
-        return df.groupby('financial_year').sum().iloc[1:,:]
+    if cal_year is False:
+        if general.last_result_month == 6:
+            return df.groupby('financial_year').sum().iloc[1:,:]
+        else:
+            return df.groupby('financial_year').sum()
     else:
-        return df.groupby('financial_year').sum()
+        return df.groupby('calendar_year').sum().iloc[1:,:]
 
 
 def costs_analysis(input_dic):
@@ -55,12 +58,15 @@ def costs_analysis(input_dic):
     df.loc[:, 'Total operating costs'] = df.sum(axis='columns')
     return df
 
-def annual_costs_analysis(input_dic):
+def annual_costs_analysis(input_dic,cal_year=False):
     df = costs_analysis(input_dic)
-    if general.last_result_month == 6:
-        return df.groupby('financial_year').sum().iloc[1:,:]
+    if cal_year is False:
+        if general.last_result_month == 6:
+            return df.groupby('financial_year').sum().iloc[1:,:]
+        else:
+            return df.groupby('financial_year').sum()
     else:
-        return df.groupby('financial_year').sum()
+        return df.groupby('calendar_year').sum().iloc[1:,:]
 
 def get_revenue_compare(dic_data, input_dic, half, year=general.recent_end_year):
     actual_df = convert_report_revenue_data(half,year)

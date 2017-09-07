@@ -89,10 +89,11 @@ def compute_quarter_half_no(series, _recent_end_year=recent_end_year,_financial_
     half_series = temp_month_series.map(half_no)
     financial_year_series = series.year.where(series.month <= _financial_year_month,series.year.where(series.month >_financial_year_month) +1)
     financial_year_series = pandas.Series(financial_year_series)
+    calendar_year_series = pandas.Series(series.year)
     
-    result = pandas.concat([pandas.Series(series),financial_year_series,quarter_series,half_series],axis='columns')
+    result = pandas.concat([pandas.Series(series),financial_year_series,quarter_series,half_series, calendar_year_series],axis='columns')
 
-    result.columns = ['month_end','financial_year','quarter_no','half_no']
+    result.columns = ['month_end','financial_year','quarter_no','half_no','calendar_year']
 
     return result
     
@@ -167,7 +168,7 @@ def convert_fy_quarter_half_index(df, index):
     df2 = df2.set_index('month_end')
     result = pandas.concat([df, df2], axis='columns')
     result = result.reset_index()
-    result = result.set_index(['month_end','financial_year','quarter_no','half_no'])
+    result = result.set_index(['month_end','financial_year','quarter_no','half_no','calendar_year'])
     return result
 
 def convert_report_data(dic):
