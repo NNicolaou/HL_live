@@ -65,7 +65,7 @@ prev_financial_year_end = prev_weekday(prev_financial_year_end)
 month_end_series = pandas.date_range(prev_financial_year_end,prev_weekday(datetime.date(recent_end_year+16,financial_year_month+1,1)-datetime.timedelta(days=1)),freq='BM')
 libor_month_end = pandas.date_range(prev_weekday(datetime.date(recent_end_year-1,last_result_month+1,1)-datetime.timedelta(days=1)),prev_weekday(datetime.date(recent_end_year+17,financial_year_month+1,1)-datetime.timedelta(days=1)),freq='BM')
 semi_annual_series = pandas.date_range(prev_financial_year_end, prev_weekday(datetime.date(recent_end_year+16,financial_year_month+1,1)-datetime.timedelta(days=1)), freq='6BM')
-
+temp_month_end = pandas.date_range((datetime.date(2016, last_result_month+1,1) - datetime.timedelta(days=1)),prev_weekday(datetime.date(recent_end_year+16,financial_year_month+1,1)-datetime.timedelta(days=1)),freq='BM')
 
 def compute_quarter_half_no(series, _recent_end_year=recent_end_year,_financial_year_month=financial_year_month,_last_result_month = last_result_month):
     '''

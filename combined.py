@@ -69,19 +69,19 @@ def get_total_asset_nnb(dic_data, input_dic):
     future_total_asset_nnb = sliced_aua.loc[:,general.disc_known_cols].sum(axis='columns') + sliced_aua.loc[:,general.vantage_known_cols].sum(axis='columns')
     return future_total_asset_nnb
 
-def get_historic_implied_nnb(dic_data):
+def get_historic_implied_nnb(dic_data,idx=general.month_end_series):
     '''
     Return a series of total historic implied nnb which is the sum of all the funds in HL
     dictionary of data
     '''
     
-    acc_bid_price = dic_data['acc price'].reindex(index=general.month_end_series)
-    inc_bid_price = dic_data['inc price'].reindex(index=general.month_end_series)
+    acc_bid_price = dic_data['acc price'].reindex(index=idx)
+    inc_bid_price = dic_data['inc price'].reindex(index=idx)
     acc_bid_return = acc_bid_price / acc_bid_price.shift(1) - 1
     inc_bid_return = inc_bid_price / inc_bid_price.shift(1) - 1
     
-    acc_size = dic_data['acc size'].reindex(index=general.month_end_series)
-    inc_size = dic_data['inc size'].reindex(index=general.month_end_series)
+    acc_size = dic_data['acc size'].reindex(index=idx)
+    inc_size = dic_data['inc size'].reindex(index=idx)
     acc_size_change = acc_size / acc_size.shift(1) - 1
     inc_size_change = inc_size / inc_size.shift(1) - 1
     
@@ -91,6 +91,24 @@ def get_historic_implied_nnb(dic_data):
     total_nnb = acc_nnb.sum(axis='columns') + inc_nnb.sum(axis='columns')
     return total_nnb
 
+def get_historic_implied_nnb_old(dic_data,idx=general.month_end_series):
+    acc_percent = dic_data['acc unit'] / (dic_data['acc unit'] + dic_data['inc unit'])
+    inc_percent = dic_data['inc unit'] / (dic_data['acc unit'] + dic_data['inc unit'])
+    
+    acc_percent = general.fillna_monthly(acc_percent).reindex(index=idx)
+    inc_percent = general.fillna_monthly(inc_percent).reindex(index=idx)
+    fund_size = dic_data['fund size'].reindex(index=idx)
+    fund_size_change = fund_size / fund_size.shift(1) - 1
+    
+    acc_bid_price = dic_data['acc price'].reindex(index=idx)
+    inc_bid_price = dic_data['inc price'].reindex(index=idx)
+    acc_bid_return = acc_bid_price / acc_bid_price.shift(1) - 1
+    inc_bid_return = inc_bid_price / inc_bid_price.shift(1) - 1
+    composite_bid_return = acc_bid_return * acc_percent + inc_bid_return * inc_percent
+    
+    result = (fund_size_change - composite_bid_return) * fund_size.shift(1)
+    return  result.sum(axis='columns')
+
 
 def total_historic_nnb(dic_data, input_dic, idx=general.month_end_series):
     '''
@@ -98,7 +116,7 @@ def total_historic_nnb(dic_data, input_dic, idx=general.month_end_series):
     dic_data: fund data
     input_dic: dictionary of inputs which include nnb distribution
     '''
-    implied_discretionary_nnb = get_historic_implied_nnb(dic_data)  # series
+    implied_discretionary_nnb = get_historic_implied_nnb(dic_data,idx=idx)  # series
     monthly_filled_inputs = general.monthly_fulfill(input_dic)
     
     total_historical_nnb = dic_data['total nnb'].reindex(index=idx)
