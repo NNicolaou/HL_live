@@ -146,7 +146,7 @@ def get_aua_compare(dic_data, input_dic, year=general.recent_end_year):
 
     return result
     
-def convert_report_revenue_data(half,year=general.recent_end_year):
+def convert_report_revenue_data(half,year=general.recent_end_year,cal_year=False):
     _revenue = data_accessing.report_data['revenue']
     
     df = pandas.DataFrame(index=_revenue.index, columns=revenue_cols)
@@ -162,19 +162,28 @@ def convert_report_revenue_data(half,year=general.recent_end_year):
     df.loc[:,'Total revenue'] = df.sum(axis='columns')
     
     df = general.convert_fy_quarter_half_index(df,_revenue.index)
-    result = df.groupby(['financial_year','half_no']).sum() 
-    
     if type(year)==int:
-        year = [year]
-    
-    if half is True:
-        result = result.loc[idx[year,1],:].transpose()
-    else:
-        result = result.groupby('financial_year').sum().loc[year,:].transpose()
-        
-    return result
+            year = [year]
+    if cal_year is False:
+        result = df.groupby(['financial_year','half_no']).sum() 
 
-def convert_report_costs_data(half, year=general.recent_end_year):
+        if half is True:
+            result = result.loc[idx[year,1],:].transpose()
+        else:
+            result = result.groupby('financial_year').sum().loc[year,:].transpose()
+
+        return result
+    else:
+        result = df.groupby(['calendar_year','half_no']).sum() 
+
+        if half is True:
+            result = result.loc[idx[year,1],:].transpose()
+        else:
+            result = result.groupby('calendar_year').sum().loc[year,:].transpose()
+
+        return result
+
+def convert_report_costs_data(half, year=general.recent_end_year, cal_year=False):
     _costs = data_accessing.report_data['costs']
     
     df = pandas.DataFrame(index=_costs.index, columns=costs_cols)
@@ -187,15 +196,25 @@ def convert_report_costs_data(half, year=general.recent_end_year):
     df.loc[:, 'Total operating costs'] = df.sum(axis='columns')
     
     df = general.convert_fy_quarter_half_index(df,_costs.index)
-    result = df.groupby(['financial_year','half_no']).sum()
+    
     if type(year)==int:
         year = [year]
-    
-    if half is True:
-        result = result.loc[idx[year,1],:].transpose()
+        
+        
+    if cal_year is False:     
+        result = df.groupby(['financial_year','half_no']).sum()
+        if half is True:
+            result = result.loc[idx[year,1],:].transpose()
+        else:
+            result = result.groupby('financial_year').sum().loc[year,:].transpose()
+        return result
     else:
-        result = result.groupby('financial_year').sum().loc[year,:].transpose()
-    return result
+        result = df.groupby(['calendar_year','half_no']).sum()
+        if half is True:
+            result = result.loc[idx[year,1],:].transpose()
+        else:
+            result = result.groupby('calendar_year').sum().loc[year,:].transpose()
+        return result
 
 def convert_report_aua_data(year=general.recent_end_year):
     final_aua = data_accessing.report_data['aua']
