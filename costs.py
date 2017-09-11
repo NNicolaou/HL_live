@@ -25,11 +25,14 @@ def semi_costs(input_dic):
     result = general.convert_fy_quarter_half_index(df, general.semi_annual_series)
     return result
 
-def annual_costs(input_dic):
+def annual_costs(input_dic, cal_year=False):
     df = semi_costs(input_dic)
-    if general.last_result_month == 6:
-        return df.groupby('financial_year').sum().iloc[1:,:]
+    if cal_year is False:
+        if general.last_result_month == 6:
+            return df.groupby('financial_year').sum().iloc[1:,:]
+        else:
+            return df.groupby('financial_year').sum()
     else:
-        return df.groupby('financial_year').sum()
+        return df.groupby('calendar_year').sum().iloc[1:,:]
     
     
