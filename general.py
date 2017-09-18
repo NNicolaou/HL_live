@@ -139,7 +139,7 @@ def monthly_fulfill(input_dic):
 def annual_libor_mean(dic_data):
     libor = dic_data['Index price'].loc[:,'Annual LIBOR']
     # assuming libor stay the same in the future, if not then type in the rate that you expect in the index and hl price data
-    result = libor.reindex(index=libor_month_end).fillna(method='ffill').rolling(12).mean().reindex(index=month_end_series)
+    result = libor.fillna(method='ffill').reindex(index=libor_month_end).fillna(method='ffill').rolling(12).mean().reindex(index=month_end_series)
     return result
 
 
