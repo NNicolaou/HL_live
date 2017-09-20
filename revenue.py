@@ -29,13 +29,13 @@ def pms_advice_fee(dic_data, input_dic):
 def cash_interest(dic_data, input_dic):
     aua = combined.total_aua(dic_data, input_dic)
     annual_libor_revenue = aua['vantage_cash_aua']*general.account_cash_dist['sipp']*0.8*(general.annual_libor_mean(dic_data)/12)#.map(general.compound_growth_rate)
-    overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].reindex(index=general.month_end_series).fillna(method='ffill')
+    overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     overnight_libor_revenue = aua['vantage_cash_aua']*(general.account_cash_dist['sipp'] * 0.2 + (1 - general.account_cash_dist['sipp']))*(overnight_libor/12)#.map(general.compound_growth_rate)
     return (annual_libor_revenue + overnight_libor_revenue).groupby(['financial_year','half_no']).sum()
 
 def cash_interest_margin(dic_data):
     annual = general.annual_libor_mean(dic_data)
-    overnight = dic_data['Index price'].loc[:, 'Overnight LIBOR'].reindex(index=general.month_end_series).fillna(method='ffill')
+    overnight = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight
     return margin
 
