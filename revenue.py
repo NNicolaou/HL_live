@@ -10,28 +10,32 @@ import combined
 aua_frame = general.report_dic['revenue'].loc[:,general.revenue_known_cols]
 #general.set_values(col_names=general.revenue_known_cols,values=general.revenue_known_values,date = general.prev_financial_year_end,df=aua_frame)
 
-
-def platform_fee(dic_data, input_dic):
+def cash_service(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['total_funds_aua'] * (aua_margins['platform_fee']/12)).groupby(['financial_year','half_no']).sum()#.map(general.compound_growth_rate))
+    return (aua['cash_service_aua'] * (aua_margins['cash_service']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
 
-def hlf_amc(dic_data, input_dic):
+def platform_fee(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['discretionary_aua'] * (aua_margins['hlf_amc']/12)).groupby(['financial_year','half_no']).sum()#.map(general.compound_growth_rate))
+    return (aua['total_funds_aua'] * (aua_margins['platform_fee']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
 
-def pms_advice_fee(dic_data, input_dic):
+def hlf_amc(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['pms_aua'] * (aua_margins['pms_advice']/12)).groupby(['financial_year','half_no']).sum()#.map(general.compound_growth_rate))
+    return (aua['discretionary_aua'] * (aua_margins['hlf_amc']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
 
-def cash_interest(dic_data, input_dic):
+def pms_advice_fee(dic_data, input_dic, period='half_no'):
+    aua = combined.total_aua(dic_data, input_dic)
+    aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
+    return (aua['pms_aua'] * (aua_margins['pms_advice']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
+
+def cash_interest(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     annual_libor_revenue = aua['vantage_cash_aua']*general.account_cash_dist['sipp']*0.8*(general.annual_libor_mean(dic_data)/12)#.map(general.compound_growth_rate)
     overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     overnight_libor_revenue = aua['vantage_cash_aua']*(general.account_cash_dist['sipp'] * 0.2 + (1 - general.account_cash_dist['sipp']))*(overnight_libor/12)#.map(general.compound_growth_rate)
-    return (annual_libor_revenue + overnight_libor_revenue).groupby(['financial_year','half_no']).sum()
+    return (annual_libor_revenue + overnight_libor_revenue).groupby(['financial_year',period]).sum()
 
 def cash_interest_margin(dic_data):
     annual = general.annual_libor_mean(dic_data)
@@ -59,6 +63,10 @@ def growth_revenues(input_dic):
 def semi_revenue(dic_data, input_dic):
     df = aua_frame.copy()
     df.loc[:,general.growth_revenue_cols] = growth_revenues(input_dic)
+    
+    series = cash_service(dic_data, input_dic)
+    series[0] = 0
+    df.loc[:,'cash_service'] = df.loc[:,'cash_service'].fillna(0) + series.values 
     
     series = hlf_amc(dic_data, input_dic)
     series[0] = 0
