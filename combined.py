@@ -170,7 +170,27 @@ def total_aua(dic_data, input_dic):
     final_aua.loc[:,'vantage_aua'] = final_aua.loc[:,'vantage_shares_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'vantage_cash_aua']
     final_aua.loc[:,'total_hlf_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_hlf_aua']
     final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'discretionary_aua'] + final_aua.loc[:,'vantage_other_funds_aua']
-    final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua']
+    
+    def cash_aua_temp(df,y1=100000000, y2=200000000, y3=400000000):
+        test = df['cash_service_aua']
+        test[(test.index>='2018-01-31') & (test.index <='2018-06-29')] = y1
+        test[(test.index>'2018-06-29') & (test.index <='2019-06-28')] = y2
+        test[(test.index>'2019-06-28') & (test.index <='2020-06-30')] = y3
+        test[(test.index>'2020-06-30')] = numpy.nan
+        test = test.fillna(method='ffill')
+        return test.cumsum()
+    
+    cash_temp = cash_aua_temp(final_aua)
+    
+    final_aua.loc[:,'cash_service_aua'] = cash_temp
+    
+    
+    
+    
+    
+    
+    final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua'] + final_aua.loc[:,'cash_service_aua']
+    
     
     
     
@@ -179,5 +199,8 @@ def total_aua(dic_data, input_dic):
     
     
     return result
+    
+    
+
     
     

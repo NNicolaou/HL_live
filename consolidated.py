@@ -10,10 +10,10 @@ import revenue
 import costs
 import data_accessing
 
-revenue_cols = ['Platform fees','Net renewal income','Management fees','HL Fund AMC','Stockbroking income','Interest receivable','Adviser charges','Funds Library','Other income']
+revenue_cols = ['Platform fees','Net renewal income','Management fees','HL Fund AMC','Stockbroking income','Interest receivable','Adviser charges','Funds Library','Cash Service','Other income']
 costs_cols = ['Staff costs', 'Marketing and distribution spend','Depreciation, amortisation & financial costs','Office running costs','Other costs','FSCS levy costs']
-aua_cols = ['Vantage AUA','PMS AUA','HLMM Funds AUA']
-nnb_cols = ['Vantage nnb','PMS nnb','HLMM Funds nnb']
+aua_cols = ['Vantage AUA','PMS AUA','HLMM Funds AUA','Cash Service AUA']
+nnb_cols = ['Vantage nnb','PMS nnb','HLMM Funds nnb','Cash Service nnb']
 
 def revenue_analysis(dic_data, input_dic):
     
@@ -21,6 +21,7 @@ def revenue_analysis(dic_data, input_dic):
         
         
     df = pandas.DataFrame(index=_revenue.index, columns=revenue_cols)
+    df.loc[:,'Cash Service'] = _revenue['cash_service']
     df.loc[:,'Platform fees'] = _revenue['platform_fee']
     df.loc[:,'Net renewal income'] = _revenue['renewal_income']
     df.loc[:,'Management fees'] = _revenue['management_fee'] + _revenue['pms_advice']
@@ -31,6 +32,7 @@ def revenue_analysis(dic_data, input_dic):
     df.loc[:,'Funds Library'] = _revenue['funds_library']
     df.loc[:,'Other income'] = _revenue['paper_income'] + _revenue['other_income']
     df.loc[:,'Total revenue'] = df.sum(axis='columns')
+    
     return df
 
 def annual_revenue_analysis(dic_data, input_dic, cal_year=False):
@@ -107,10 +109,11 @@ def aua_analysis(dic_data, input_dic):
     df.index.name='month_end'
     df = df.reset_index().set_index(['month_end','financial_year','quarter_no','half_no'])
     result = pandas.DataFrame(index= df.index, columns = aua_cols)
+    result.loc[:,'Cash Service AUA'] = df['cash_service_aua']
     result.loc[:,'Vantage AUA'] = df['vantage_aua']
     result.loc[:,'PMS AUA'] = df['pms_aua']
     result.loc[:,'HLMM Funds AUA'] = df['discretionary_aua']
-    result.loc[:, 'Total AUA']= result.loc[:,'Vantage AUA'] + result.loc[:,'PMS AUA']
+    result.loc[:, 'Total AUA']= result.loc[:,'Vantage AUA'] + result.loc[:,'PMS AUA'] + result.loc[:,'Cash Service AUA']
     
     
     return result.groupby(['financial_year','quarter_no','half_no']).sum()
@@ -122,7 +125,8 @@ def nnb_analysis(dic_data, input_dic):
     result.loc[:,'Vantage nnb'] = df.loc[:,'vantage_hl_shares_aua'] + df.loc[:,'vantage_other_shares_aua'] + df.loc[:,'vantage_other_funds_aua'] + df.loc[:,'vantage_hlf_aua'] + df.loc[:,'thirdparty_hlf_aua'] + df.loc[:,'vantage_cash_aua']
     result.loc[:,'PMS nnb'] = df['pms_hlf_aua'] + df['pms_others_aua']
     result.loc[:,'HLMM Funds nnb'] = df.loc[:,'vantage_hlf_aua'] + df.loc[:,'thirdparty_hlf_aua'] + df['pms_hlf_aua'] + df['pms_others_aua']
-    result.loc[:,'Total nnb'] = result.loc[:,'Vantage nnb'] + result.loc[:,'PMS nnb']
+    result.loc[:,'Cash Service nnb'] = df['cash_service_aua']
+    result.loc[:,'Total nnb'] = result.loc[:,'Vantage nnb'] + result.loc[:,'PMS nnb'] + result.loc[:,'Cash Service nnb']
 
     return result
 
@@ -150,6 +154,7 @@ def convert_report_revenue_data(half,year=general.recent_end_year,cal_year=False
     _revenue = data_accessing.report_data['revenue']
     
     df = pandas.DataFrame(index=_revenue.index, columns=revenue_cols)
+    df.loc[:,'Cash Service'] = _revenue['cash_service']
     df.loc[:,'Platform fees'] = _revenue['platform_fee']
     df.loc[:,'Net renewal income'] = _revenue['renewal_income']
     df.loc[:,'Management fees'] = _revenue['management_fee'] + _revenue['pms_advice']
@@ -222,7 +227,8 @@ def convert_report_aua_data(year=general.recent_end_year):
     df.loc[:,'Vantage AUA'] = final_aua.loc[:,'vantage_hl_shares_aua'] + final_aua.loc[:,'vantage_other_shares_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua'] + final_aua.loc[:,'vantage_cash_aua']
     df.loc[:,'PMS AUA'] = final_aua.loc[:,'pms_others_aua'] + final_aua.loc[:,'pms_hlf_aua']
     df.loc[:,'HLMM Funds AUA'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua'] + final_aua.loc[:,'pms_others_aua'] + final_aua.loc[:,'pms_hlf_aua']
-    df.loc[:, 'Total AUA']= df.loc[:,'Vantage AUA'] + df.loc[:,'PMS AUA']
+    df.loc[:,'Cash Service AUA'] = final_aua.loc[:,'cash_service_aua']
+    df.loc[:, 'Total AUA']= df.loc[:,'Vantage AUA'] + df.loc[:,'PMS AUA'] + df.loc[:,'Cash Service AUA']
     df.index.name = 'month_end'
     
     df = general.convert_fy_quarter_half_index(df,final_aua.index)
