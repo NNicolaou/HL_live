@@ -173,8 +173,8 @@ def total_aua(dic_data, input_dic):
     
     def cash_aua_temp(df,y1=50000000, y2=75000000):
         test = df['cash_service_aua']
-        test[(test.index>='2018-01-31') & (test.index <='2018-06-29')] = y1
-        test[(test.index>'2018-06-29')] = y2
+        test[(test.index>='2018-07-31') & (test.index <='2018-12-31')] = y1
+        test[(test.index>'2018-12-31')] = y2
         
         return test.cumsum()
     
