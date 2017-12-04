@@ -75,13 +75,13 @@ def get_historic_implied_nnb(dic_data,idx=general.month_end_series):
     dictionary of data
     '''
     
-    acc_bid_price = dic_data['acc price'].reindex(index=idx)
-    inc_bid_price = dic_data['inc price'].reindex(index=idx)
+    acc_bid_price = dic_data['acc price'].reindex(index=idx).fillna(method='ffill')
+    inc_bid_price = dic_data['inc price'].reindex(index=idx).fillna(method='ffill')
     acc_bid_return = acc_bid_price / acc_bid_price.shift(1) - 1
     inc_bid_return = inc_bid_price / inc_bid_price.shift(1) - 1
     
-    acc_size = dic_data['acc size'].reindex(index=idx)
-    inc_size = dic_data['inc size'].reindex(index=idx)
+    acc_size = dic_data['acc size'].reindex(index=idx).fillna(method='ffill')
+    inc_size = dic_data['inc size'].reindex(index=idx).fillna(method='ffill')
     acc_size_change = acc_size / acc_size.shift(1) - 1
     inc_size_change = inc_size / inc_size.shift(1) - 1
     
@@ -97,11 +97,11 @@ def get_historic_implied_nnb_old(dic_data,idx=general.month_end_series):
     
     acc_percent = general.fillna_monthly(acc_percent).reindex(index=idx)
     inc_percent = general.fillna_monthly(inc_percent).reindex(index=idx)
-    fund_size = dic_data['fund size'].reindex(index=idx)
+    fund_size = dic_data['fund size'].reindex(index=idx).fillna(method='ffill')
     fund_size_change = fund_size / fund_size.shift(1) - 1
     
-    acc_bid_price = dic_data['acc price'].reindex(index=idx)
-    inc_bid_price = dic_data['inc price'].reindex(index=idx)
+    acc_bid_price = dic_data['acc price'].reindex(index=idx).fillna(method='ffill')
+    inc_bid_price = dic_data['inc price'].reindex(index=idx).fillna(method='ffill')
     acc_bid_return = acc_bid_price / acc_bid_price.shift(1) - 1
     inc_bid_return = inc_bid_price / inc_bid_price.shift(1) - 1
     composite_bid_return = acc_bid_return * acc_percent + inc_bid_return * inc_percent
@@ -170,7 +170,25 @@ def total_aua(dic_data, input_dic):
     final_aua.loc[:,'vantage_aua'] = final_aua.loc[:,'vantage_shares_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'vantage_cash_aua']
     final_aua.loc[:,'total_hlf_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_hlf_aua']
     final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'discretionary_aua'] + final_aua.loc[:,'vantage_other_funds_aua']
-    final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua']
+    
+    def cash_aua_temp(df,y1=50000000, y2=75000000):
+        test = df['cash_service_aua']
+        test[(test.index>='2018-07-31') & (test.index <='2018-12-31')] = y1
+        test[(test.index>'2018-12-31')] = y2
+        
+        return test.cumsum()
+    
+    cash_temp = cash_aua_temp(final_aua)
+    
+    final_aua.loc[:,'cash_service_aua'] = cash_temp
+    
+    
+    
+    
+    
+    
+    final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua'] + final_aua.loc[:,'cash_service_aua']
+    
     
     
     
@@ -179,5 +197,8 @@ def total_aua(dic_data, input_dic):
     
     
     return result
+    
+    
+
     
     

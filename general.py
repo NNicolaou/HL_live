@@ -7,7 +7,7 @@ idx = pandas.IndexSlice
 '''
 Inputs
 '''
-recent_end_year = 2017
+recent_end_year = 2017    # Calendar year
 last_result_month = 6
 financial_year_month = 6
 discretionary_aua_headers = ['pms_aua', 'pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua','hlf_aua','discretionary_aua']
@@ -20,7 +20,7 @@ new_deposit_service_headers = ['deposit_cash_aua']
 disc_known_cols = ['pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua']
 disc_known_values = [3159000000.0,50000000.0,4303000000.0,69000000.0]
 
-vantage_known_cols = ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_other_funds_aua','vantage_cash_aua']
+vantage_known_cols = ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_other_funds_aua','vantage_cash_aua','cash_service_aua']
 vantage_known_values = [2134400000.0,20543600000.0,31692000000.0,7337000000.0]
 
 fund_distribution_cols = ['FTSE All Share', 'FTSE All Share TR', 'Eurostoxx 50', 'SP Asia 50', 'S&P500', 'Nikkei 225','FTSE UK Property', 'Cash']
@@ -29,7 +29,7 @@ fund_distribution_values = [0.275,0.275,0.15,0.09,0.13,0.03,0.02,0.03]
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
 
-revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve']
+revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
 revenue_known_values = [2800000.0,8300000.0,28000000.0,1400000.0,18500000.0,26300000.0,80500000.0,5400000.0,5150000.0,3900000.0,2150000.0,1500000.0,900000.0,440000.0]
 
 growth_revenue_cols = ['advice_fee','currency_revenue','funds_library','interest_on_reserve','management_fee','other_income','renewal_income','stockbroking_commission','stockbroking_income']
@@ -139,7 +139,7 @@ def monthly_fulfill(input_dic):
 def annual_libor_mean(dic_data):
     libor = dic_data['Index price'].loc[:,'Annual LIBOR']
     # assuming libor stay the same in the future, if not then type in the rate that you expect in the index and hl price data
-    result = libor.reindex(index=libor_month_end).fillna(method='ffill').rolling(12).mean().reindex(index=month_end_series)
+    result = libor.fillna(method='ffill').reindex(index=libor_month_end).fillna(method='ffill').rolling(12).mean().reindex(index=month_end_series)
     return result
 
 

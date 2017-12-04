@@ -19,12 +19,11 @@ else:
 dcf_period = 9
 perpetuity_growth_rate = 0.0375  # Gordon growth rate - long term growth rate
 no_of_shares = 474720010
-net_debt_cash = 211000000.0
+net_debt_cash = 114157118 # =211000000 - 0.204*474720010
 discount_rate = 0.0825 # WACC - cost of equity
 #=============================================================================================================
-dcf_end_year = dcf_start_year + dcf_period - 1
-def disc_cash_flow(dic_data, input_dic, now=False):
-    dcf_end = dcf_end_year
+def disc_cash_flow(dic_data, input_dic, now=False, dcf_p=dcf_period, disc_rate = discount_rate):
+    dcf_end = dcf_start_year + dcf_p - 1
     if now is True:
         dcf_end = dcf_end -1
     if general.last_result_month == 6:
@@ -61,22 +60,22 @@ def disc_cash_flow(dic_data, input_dic, now=False):
         dcf.loc['Free cash flow',:] = dcf.loc['EAT',:] + dcf.loc['Depreciation',:] - dcf.loc['Capital Expenditure',:]
     
     s1 = pandas.Series(1, index=dcf.columns).cumsum()
-    s2 = pandas.Series(1+discount_rate, index=dcf.columns)
+    s2 = pandas.Series(1+disc_rate, index=dcf.columns)
     
     discount_factors = s2 ** s1
     dcf.loc['Discounted cash flow',:] = dcf.loc['Free cash flow',:] / (s2 ** s1)
     
     return dcf
 
-def fair_value(dic_data, input_dic,now=False):
-    df = disc_cash_flow(dic_data, input_dic, now=now)
-    dcf_end = dcf_end_year
+def fair_value(dic_data, input_dic,now=False, dcf_p=dcf_period,disc_rate = discount_rate, pep_rate = perpetuity_growth_rate):
+    df = disc_cash_flow(dic_data, input_dic, now=now, dcf_p=dcf_p, disc_rate=disc_rate)
+    dcf_end = dcf_start_year + dcf_p - 1
     if now is True:
         dcf_end = dcf_end -1
     hl = pandas.DataFrame(index=['Terminal value','Enterprise value', 'Net debt&cash','Fair value','No. of shares','Fair value per share'], columns=['HL'])
-    terminal_value = (df.loc['Free cash flow',dcf_end]*(1+perpetuity_growth_rate)) / (discount_rate-perpetuity_growth_rate)
+    terminal_value = (df.loc['Free cash flow',dcf_end]*(1+pep_rate)) / (disc_rate-pep_rate)
     hl.loc['Terminal value',:] = terminal_value
-    enterprise_value = df.loc['Discounted cash flow',:].sum() + (terminal_value/((1+discount_rate)**dcf_period))
+    enterprise_value = df.loc['Discounted cash flow',:].sum() + (terminal_value/((1+disc_rate)**dcf_period))
     hl.loc['Enterprise value',:] = enterprise_value
     hl.loc['Net debt&cash',:] = net_debt_cash
     hl.loc['Fair value',:] = enterprise_value + net_debt_cash
