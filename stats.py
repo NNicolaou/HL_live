@@ -77,9 +77,11 @@ def summary_revenue_dist(data_dic, input_dic):
     revenue_hlf_amc.name = 'HLF AMC'
     revenue_cash = revenue.annual_revenue(data_dic, input_dic)['interest_on_cash']
     revenue_cash.name = 'Cash'
-    revenue_other = revenue.annual_revenue(data_dic, input_dic).drop(['management_fee','stockbroking_commission','platform_fee','hlf_amc','interest_on_cash'], axis='columns').sum(axis='columns')
+    revenue_cash_service = revenue.annual_revenue(data_dic, input_dic)['cash_service']
+    revenue_cash_service.name = 'Cash Service'
+    revenue_other = revenue.annual_revenue(data_dic, input_dic).drop(['management_fee','stockbroking_commission','platform_fee','hlf_amc','interest_on_cash','cash_service'], axis='columns').sum(axis='columns')
     revenue_other.name = 'Other'
-    return pandas.concat([revenue_shares,revenue_funds,revenue_hlf_amc,revenue_cash,revenue_other],axis='columns')
+    return pandas.concat([revenue_shares,revenue_funds,revenue_hlf_amc,revenue_cash,revenue_cash_service,revenue_other],axis='columns')
 
 def summary_revenue_dist_percent(data_dic, input_dic):
     df = summary_revenue_dist(data_dic, input_dic)
@@ -95,11 +97,14 @@ def summary_avg_aua_dist(data_dic, input_dic):
     avg_aua_hlf_amc.name = 'HLF AMC'
     avg_aua_cash = df['vantage_cash_aua']
     avg_aua_cash.name = 'Cash'
+    avg_aua_cash_service = df['cash_service_aua']
+    avg_aua_cash_service.name = 'Cash Service'
+    
     if general.last_result_month == 6:
         temp = general.recent_end_year + 1
     else:
         temp = general.recent_end_year
-    result = pandas.concat([avg_aua_funds,avg_aua_shares,avg_aua_hlf_amc,avg_aua_cash],axis='columns')
+    result = pandas.concat([avg_aua_funds,avg_aua_shares,avg_aua_hlf_amc,avg_aua_cash,avg_aua_cash_service],axis='columns')
     return result.loc[temp:,:]
 
 def cash_margin(data_dic):
@@ -111,5 +116,30 @@ def cash_margin(data_dic):
         temp = general.recent_end_year
     result = general.convert_fy_quarter_half_index(result, result.index)
     return result.groupby('financial_year').mean().loc[temp:,:]
-    
-    
+
+def hlf_implied_actual_nnb(data_dic, input_dic):
+    result = combined.historic_nnb_distribution(data_dic, input_dic)
+    hlf_nnb = result['pms_others_aua'] +result['pms_hlf_aua'] +result['thirdparty_hlf_aua']+result['vantage_hlf_aua']
+    result = general.convert_fy_quarter_half_index(hlf_nnb,hlf_nnb.index)
+    return result
+
+def hlf_to_date_implied_nnb(data_dic,typ=None):
+    '''
+    typ: 'day','month','quarter','annual'
+    '''
+    df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index)
+    df.name = 'HLF nnb'
+    df2 = general.convert_fy_quarter_half_index(df,df.index)
+    df2 = df2.reset_index()
+    df2.loc[:,'month_no'] = pandas.DatetimeIndex(df2['month_end']).month
+    result = df2.set_index(['month_end','financial_year','quarter_no','half_no','calendar_year','month_no'])
+    if typ=='day':
+        return df[df.index<=pandas.to_datetime(datetime.datetime.today())]
+    elif typ=='month':
+        return result.groupby(['calendar_year','month_no']).sum()
+    elif typ=='quarter':
+        return result.groupby(['financial_year','quarter_no']).sum()
+    elif typ=='annual':
+        return result.groupby('financial_year').sum()
+    else:
+        return result
