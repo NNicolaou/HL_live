@@ -7,12 +7,15 @@ import discretionary_aua
 import vantage_aua
 import combined
 import revenue
+import data_accessing
 
 aua_frame = general.report_dic['costs'].loc[:,general.growth_costs_cols]
 #general.set_values(col_names=general.growth_costs_cols,values=general.costs_known_values,date = general.prev_financial_year_end,df=aua_frame)
 
 def total_costs(input_dic):
+
     df = aua_frame.copy()
+
     df = df.loc[:,general.growth_costs_cols]
     costs = general.fillna_monthly(input_dic['growth rate']).loc[:,general.growth_costs_cols].reindex(index=general.semi_annual_series)
     costs.iloc[0,:]=0
@@ -34,5 +37,3 @@ def annual_costs(input_dic, cal_year=False):
             return df.groupby('financial_year').sum()
     else:
         return df.groupby('calendar_year').sum().iloc[1:,:]
-    
-    
