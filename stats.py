@@ -116,7 +116,7 @@ def cash_margin(data_dic, period):
     else:
         temp = general.recent_end_year
     result = general.convert_fy_quarter_half_index(result, result.index)
-    if period='monthly':
+    if period=='monthly':
         return result
     else:
         return result.groupby(period).mean().loc[temp:,:]
