@@ -18,8 +18,8 @@ else:
 #===============================================Inputs=========================================================
 dcf_period = 9
 perpetuity_growth_rate = 0.0375  # Gordon growth rate - long term growth rate
-no_of_shares = 474720010
-net_debt_cash = 114157118 # =211000000 - 0.204*474720010
+no_of_shares = 474402854 # 474965441
+net_debt_cash = 81400000
 discount_rate = 0.0825 # WACC - cost of equity
 #=============================================================================================================
 def disc_cash_flow(dic_data, input_dic, now=False, dcf_p=dcf_period, disc_rate = discount_rate):
