@@ -14,39 +14,39 @@ import discf
 FY annual statistics
 '''
 
-def total_revenue(data_dic, input_dic):
-    result = revenue.annual_revenue(data_dic,input_dic).sum(axis='columns')
+def total_revenue(data_dic, input_dic, cal=False):
+    result = revenue.annual_revenue(data_dic,input_dic,cal).sum(axis='columns')
     result.name = 'Total Revenue'
     return result
 
-def costs_no_capex(input_dic):
-    result = costs.annual_costs(input_dic).sum(axis='columns')-costs.annual_costs(input_dic)['capital_expenditure']
+def costs_no_capex(input_dic, cal=False):
+    result = costs.annual_costs(input_dic,cal).sum(axis='columns')-costs.annual_costs(input_dic,cal)['capital_expenditure']
     result.name = 'Total Costs'
     return result
 
-def net_earning_before_tax(data_dic, input_dic):
-    revenue = total_revenue(data_dic, input_dic)
-    costs = costs_no_capex(input_dic)
+def net_earning_before_tax(data_dic, input_dic, cal=False):
+    revenue = total_revenue(data_dic, input_dic, cal)
+    costs = costs_no_capex(input_dic, cal)
     result = revenue + costs
     result.name = 'Net Earning Before Tax'
     return result
 
-def net_earning_after_tax(data_dic, input_dic):
-    net_earning_bef_tax = net_earning_before_tax(data_dic, input_dic)
+def net_earning_after_tax(data_dic, input_dic, cal=False):
+    net_earning_bef_tax = net_earning_before_tax(data_dic, input_dic, cal)
     tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(net_earning_bef_tax.index).fillna(method='ffill')['Tax']
     result = net_earning_bef_tax*(1-tax_rate)
     result.name = 'Net Earning After Tax'
     return result
 
-def earning_per_share(data_dic, input_dic):
+def earning_per_share(data_dic, input_dic, cal=False):
     '''
     Capital expenditure is not included in the calculation
     '''
-    net_earning_af_tax = net_earning_after_tax(data_dic, input_dic)
+    net_earning_af_tax = net_earning_after_tax(data_dic, input_dic, cal)
     result = net_earning_af_tax / discf.no_of_shares
     result.name = 'EPS'
     return result
-
+'''
 def total_aua(data_dic, input_dic):
     test = combined.total_aua(data_dic,input_dic)
     test.index  = test.index.get_level_values(level='month_end')
@@ -58,15 +58,16 @@ def total_aua(data_dic, input_dic):
     result =  general.convert_fy_quarter_half_index(result, result.index).groupby('financial_year').sum()['total_assets_aua'].loc[temp:]
     result.name='Total AUA'
     return result
+'''
 
-def summary_total(data_dic, input_dic):
-    df1 = total_revenue(data_dic, input_dic)
-    df2 = costs_no_capex(input_dic)
-    df = net_earning_before_tax(data_dic, input_dic)
-    df3 = net_earning_after_tax(data_dic, input_dic)
-    df4 = earning_per_share(data_dic, input_dic)
-    df5 = total_aua(data_dic, input_dic)
-    return pandas.concat([df1, df2, df, df3, df4, df5],axis='columns')
+def summary_total(data_dic, input_dic, cal=False):
+    df1 = total_revenue(data_dic, input_dic, cal)
+    df2 = costs_no_capex(input_dic, cal)
+    df = net_earning_before_tax(data_dic, input_dic, cal)
+    df3 = net_earning_after_tax(data_dic, input_dic, cal)
+    df4 = earning_per_share(data_dic, input_dic, cal)
+    #df5 = total_aua(data_dic, input_dic)
+    return pandas.concat([df1, df2, df, df3, df4],axis='columns')
 
 def summary_revenue_dist(data_dic, input_dic):
     revenue_shares = revenue.annual_revenue(data_dic, input_dic)['management_fee']+revenue.annual_revenue(data_dic, input_dic)['stockbroking_commission']
@@ -107,7 +108,7 @@ def summary_avg_aua_dist(data_dic, input_dic):
     result = pandas.concat([avg_aua_funds,avg_aua_shares,avg_aua_hlf_amc,avg_aua_cash,avg_aua_cash_service],axis='columns')
     return result.loc[temp:,:]
 
-def cash_margin(data_dic):
+def cash_margin(data_dic, period):
     result = revenue.cash_interest_margin(data_dic)
     result.name='Cash Margin'
     if general.last_result_month == 6:
@@ -115,7 +116,10 @@ def cash_margin(data_dic):
     else:
         temp = general.recent_end_year
     result = general.convert_fy_quarter_half_index(result, result.index)
-    return result.groupby('financial_year').mean().loc[temp:,:]
+    if period=='monthly':
+        return result
+    else:
+        return result.groupby(period).mean().loc[temp:,:]
 
 def hlf_implied_actual_nnb(data_dic, input_dic):
     result = combined.historic_nnb_distribution(data_dic, input_dic)
@@ -123,11 +127,11 @@ def hlf_implied_actual_nnb(data_dic, input_dic):
     result = general.convert_fy_quarter_half_index(hlf_nnb,hlf_nnb.index)
     return result
 
-def hlf_to_date_implied_nnb(data_dic,typ=None):
+def hlf_to_date_implied_nnb(data_dic,typ=None, fund_opt=None):
     '''
     typ: 'day','month','quarter','annual'
     '''
-    df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index)
+    df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index, funds_opt=fund_opt)
     df.name = 'HLF nnb'
     df2 = general.convert_fy_quarter_half_index(df,df.index)
     df2 = df2.reset_index()
@@ -143,3 +147,15 @@ def hlf_to_date_implied_nnb(data_dic,typ=None):
         return result.groupby('financial_year').sum()
     else:
         return result
+    
+def pat_projection(data_dic, input_dic):
+    a = revenue.semi_revenue(data_dic, input_dic)
+    b = costs.semi_costs(input_dic)
+    r_result = a.sum(axis='columns')
+    c_result = b.drop('capital_expenditure',axis='columns').sum(axis='columns')
+    final = (r_result + c_result)
+    tax_dic = input_dic['tax rate'].fillna(method='ffill').fillna(method='bfill').to_dict()['Tax']
+    test = final.to_frame().reset_index()
+    tax_rate = 1 - test['calendar_year'].map(tax_dic).fillna(method='ffill')
+    tax_rate.index=final.index
+    return final * tax_rate
