@@ -1,9 +1,9 @@
 import pandas
 import numpy
 import datetime
-import psycopg2
-from sqlalchemy import create_engine
-import sqlalchemy
+# import psycopg2
+# from sqlalchemy import create_engine
+# import sqlalchemy
 idx = pandas.IndexSlice
 
 fund_data_name = 'HL funds data.xlsx'
