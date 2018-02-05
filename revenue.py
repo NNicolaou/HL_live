@@ -59,13 +59,17 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     hlf_revenue = hlf_revenue*(0.0075/365)              
     total_hlf = select_revenue+hlf_revenue
     total_hlf.name='hlf_revenue'              
-    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index)              
-    final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
+    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index) 
+    if period == 'month_no':
+        final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
+    else:
+        final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
     if general.last_result_month == 6:
         final_result = final_result.drop((general.recent_end_year,1),axis='index')
     final_result = final_result.stack()      
     final_result.index = final_result.index.droplevel(2)
     return final_result
+    
                   
                   
                   
