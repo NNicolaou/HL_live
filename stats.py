@@ -159,3 +159,8 @@ def pat_projection(data_dic, input_dic):
     tax_rate = 1 - test['calendar_year'].map(tax_dic).fillna(method='ffill')
     tax_rate.index=final.index
     return final * tax_rate
+
+def hlf_revenue_margin(data_dic, input_dic):
+    df1 = revenue.hlf_amc_daily(data_dic, input_dic, period='month_no')
+    df2 = combined.total_aua(data_dic,input_dic)['discretionary_aua'].groupby(['calendar_year','month_no']).sum()
+    return df1 / df2.reindex(df1.index)
