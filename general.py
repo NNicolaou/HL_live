@@ -28,6 +28,7 @@ fund_distribution_values = [0.275,0.275,0.15,0.09,0.13,0.03,0.02,0.03]
 
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
+account_aua_dist = {'sipp':0.33, 'isa':0.4, 'f&s':0.27}
 
 revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
 revenue_known_values = [2800000.0,8300000.0,28000000.0,1400000.0,18500000.0,26300000.0,80500000.0,5400000.0,5150000.0,3900000.0,2150000.0,1500000.0,900000.0,440000.0]
