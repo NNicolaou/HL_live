@@ -88,16 +88,15 @@ def summary_revenue_dist_percent(data_dic, input_dic):
     df = summary_revenue_dist(data_dic, input_dic)
     return df.divide(df.sum(axis='columns'),axis='index')
 
-def summary_avg_aua_dist(data_dic, input_dic):
-    df = combined.total_aua(data_dic, input_dic).groupby('financial_year').mean()
-    avg_aua_funds = df['total_funds_aua']
-    avg_aua_funds.name = 'Funds'
-    avg_aua_shares = df['vantage_shares_aua']
-    avg_aua_shares.name = 'Shares'
-    avg_aua_hlf_amc = df['discretionary_aua']
-    avg_aua_hlf_amc.name = 'HLF AMC'
-    avg_aua_cash = df['vantage_cash_aua']
-    avg_aua_cash.name = 'Cash'
+def summary_avg_aua_dist(data_dic, input_dic, period='financial_year'):
+    if (period == 'financial_year') or (period == 'calendar_year'):
+        df = combined.total_aua(data_dic, input_dic).groupby(period).mean()
+    else:
+        df = combined.total_aua(data_dic, input_dic).groupby(['financial_year',period]).mean()
+    avg_aua_funds = df['Funds']
+    avg_aua_shares = df['Shares']
+    avg_aua_hlf_amc = df['HLF']
+    avg_aua_cash = df['Cash']
     avg_aua_cash_service = df['cash_service_aua']
     avg_aua_cash_service.name = 'Cash Service'
     
@@ -118,8 +117,10 @@ def cash_margin(data_dic, period):
     result = general.convert_fy_quarter_half_index(result, result.index)
     if period=='monthly':
         return result
-    else:
+    elif (period=='financial_year') or (period=='calendar_year'):
         return result.groupby(period).mean().loc[temp:,:]
+    else:
+        return result.groupby(['financial_year',period]).mean().loc[temp:,:]
 
 def hlf_implied_actual_nnb(data_dic, input_dic):
     result = combined.historic_nnb_distribution(data_dic, input_dic)
@@ -134,15 +135,51 @@ def hlf_to_date_implied_nnb(data_dic,typ=None, fund_opt=None):
     df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index, funds_opt=fund_opt)
     df.name = 'HLF nnb'
     df2 = general.convert_fy_quarter_half_index(df,df.index)
-    df2 = df2.reset_index()
-    df2.loc[:,'month_no'] = pandas.DatetimeIndex(df2['month_end']).month
-    result = df2.set_index(['month_end','financial_year','quarter_no','half_no','calendar_year','month_no'])
+    #df2 = df2.reset_index()
+    #df2.loc[:,'month_no'] = pandas.DatetimeIndex(df2['month_end']).month
+    result = df2#.set_index(['month_end','financial_year','quarter_no','half_no','calendar_year','month_no'])
     if typ=='day':
         return df[df.index<=pandas.to_datetime(datetime.datetime.today())]
     elif typ=='month':
         return result.groupby(['calendar_year','month_no']).sum()
     elif typ=='quarter':
         return result.groupby(['financial_year','quarter_no']).sum()
+    elif typ=='semi-annual':
+        return result.groupby(['financial_year','half_no']).sum()
+    elif typ=='annual':
+        return result.groupby('financial_year').sum()
+    else:
+        return result
+    
+def hlf_to_date_unit_change(data_dic, unit_type, typ=None, fund_opt=None):
+    acc_df = data_dic['acc unit'].fillna(method='ffill')
+    inc_df = data_dic['inc unit'].fillna(method='ffill')
+    
+    if fund_opt == 'no_select':
+        acc_df.drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
+        inc_df.drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
+    
+    acc_change = acc_df - acc_df.shift(1)
+    inc_change = inc_df - inc_df.shift(1)
+    
+    acc_change_df = general.convert_fy_quarter_half_index(acc_change,acc_change.index)
+    inc_change_df = general.convert_fy_quarter_half_index(inc_change,inc_change.index)
+    
+    if unit_type == 'acc':
+        result = acc_change_df
+        result2 = acc_change
+    elif unit_type == 'inc':
+        result = inc_change_df
+        result2 = inc_change
+    
+    if typ=='day':
+        return result2[result2.index<=pandas.to_datetime(datetime.datetime.today())]
+    elif typ=='month':
+        return result.groupby(['calendar_year','month_no']).sum()
+    elif typ=='quarter':
+        return result.groupby(['financial_year','quarter_no']).sum()
+    elif typ=='semi-annual':
+        return result.groupby(['financial_year','half_no']).sum()
     elif typ=='annual':
         return result.groupby('financial_year').sum()
     else:
@@ -159,3 +196,8 @@ def pat_projection(data_dic, input_dic):
     tax_rate = 1 - test['calendar_year'].map(tax_dic).fillna(method='ffill')
     tax_rate.index=final.index
     return final * tax_rate
+
+def hlf_revenue_margin(data_dic, input_dic):
+    df1 = revenue.hlf_amc_daily(data_dic, input_dic, period='month_no')
+    df2 = combined.total_aua(data_dic,input_dic)['discretionary_aua'].groupby(['calendar_year','month_no']).sum()
+    return df1 / df2.reindex(df1.index)

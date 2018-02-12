@@ -14,12 +14,26 @@ aua_frame = general.report_dic['revenue'].loc[:,general.revenue_known_cols]
 def cash_service(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['cash_service_aua'] * (aua_margins['cash_service']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
+    net_revenue = (aua['cash_service_aua'] * (aua_margins['cash_service']/12))
+    if period=='month_no':
+        result = net_revenue
+    elif (period=='financial_year' or period=='calendar_year'):
+        result = net_revenue.groupby(period).sum()
+    else:
+        result = net_revenue.groupby(['financial_year',period]).sum()
+    return result#.map(general.compound_growth_rate))
 
 def platform_fee(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['total_funds_aua'] * (aua_margins['platform_fee']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
+    net_revenue = (aua['total_funds_aua'] * (aua_margins['platform_fee']/12))
+    if period=='month_no':
+        result = net_revenue
+    elif (period=='financial_year' or period=='calendar_year'):
+        result = net_revenue.groupby(period).sum()
+    else:
+        result = net_revenue.groupby(['financial_year',period]).sum()
+    return result#.map(general.compound_growth_rate))
 
 def hlf_amc(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
@@ -59,32 +73,52 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     hlf_revenue = hlf_revenue*(0.0075/365)              
     total_hlf = select_revenue+hlf_revenue
     total_hlf.name='hlf_revenue'              
-    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index)              
-    final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
+    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index) 
+    if period == 'month_no':
+        final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:] 
+    else:
+        final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
     if general.last_result_month == 6:
         final_result = final_result.drop((general.recent_end_year,1),axis='index')
     final_result = final_result.stack()      
     final_result.index = final_result.index.droplevel(2)
+    
     return final_result
+    
                   
                   
                   
 def pms_advice_fee(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['pms_aua'] * (aua_margins['pms_advice']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
+    net_revenue = (aua['pms_aua'] * (aua_margins['pms_advice']/12))
+    if period=='month_no':
+        result = net_revenue
+    elif (period=='financial_year' or period=='calendar_year'):
+        result = net_revenue.groupby(period).sum()
+    else:
+        result = net_revenue.groupby(['financial_year',period]).sum()
+    return result#.map(general.compound_growth_rate))
 
 def cash_interest(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     annual_libor_revenue = aua['vantage_cash_aua']*general.account_cash_dist['sipp']*0.8*(general.annual_libor_mean(dic_data)/12)#.map(general.compound_growth_rate)
     overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     overnight_libor_revenue = aua['vantage_cash_aua']*(general.account_cash_dist['sipp'] * 0.2 + (1 - general.account_cash_dist['sipp']))*(overnight_libor/12)#.map(general.compound_growth_rate)
-    return (annual_libor_revenue + overnight_libor_revenue).groupby(['financial_year',period]).sum()
+    gross_revenue = (annual_libor_revenue + overnight_libor_revenue)
+    net_revenue = gross_revenue - aua['vantage_cash_aua'] * general.account_cash_dist['sipp'] * (0.0005/12) # effective from Nov-2017
+    if period=='month_no':
+        result = net_revenue
+    elif (period=='financial_year' or period=='calendar_year'):
+        result = net_revenue.groupby(period).sum()
+    else:
+        result = net_revenue.groupby(['financial_year',period]).sum()
+    return result
 
 def cash_interest_margin(dic_data):
     annual = general.annual_libor_mean(dic_data)
     overnight = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
-    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight
+    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * 0.0005)
     return margin
 
 def paper_statement_revenue(dic_data):
@@ -145,4 +179,25 @@ def annual_revenue(dic_data, input_dic, cal_year=False):
             return df.groupby('financial_year').sum()
     else:
         return df.groupby('calendar_year').sum().iloc[1:,:]
+    
+def monthly_revenue(dic_data, input_dic):
+    cash_df = cash_interest(dic_data, input_dic,'month_no')
+    cash_df.name='cash_interest'
+    cash_service_df = cash_service(dic_data, input_dic, 'month_no')
+    cash_service_df.name = 'cash_service'
+    platform_df = platform_fee(dic_data, input_dic, 'month_no')
+    platform_df.name = 'platform_fee'
+    pms_advice = pms_advice_fee(dic_data, input_dic, 'month_no')
+    pms_advice.name = 'pms_advice'
+    hlf = hlf_amc_daily(dic_data, input_dic, 'month_no').iloc[4:]
+    hlf = hlf.reset_index().set_index(platform_df.index)
+    hlf = hlf.drop(['calendar_year','month_no'],axis='columns')
+    hlf.columns = ['hlf_amc']
+    hlf = hlf['hlf_amc']
+    
+    result = pandas.concat([cash_df, cash_service_df, platform_df, pms_advice, hlf],axis='columns')
+    return result
+    
+
+    
     
