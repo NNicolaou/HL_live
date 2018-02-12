@@ -181,6 +181,13 @@ def total_aua(dic_data, input_dic):
     
     final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua'] + final_aua.loc[:,'cash_service_aua']
     
+    final_aua.loc[:,'Funds'] = final_aua.loc[:,'total_funds_aua']
+    final_aua.loc[:,'Shares'] = final_aua.loc[:,'vantage_shares_aua']
+    final_aua.loc[:,'HLF'] = final_aua.loc[:,'discretionary_aua']
+    final_aua.loc[:,'Cash'] = final_aua.loc[:,'vantage_cash_aua']
+    final_aua.loc[:, 'SIPP'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['sipp']
+    final_aua.loc[:, 'ISA'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['isa']
+    final_aua.loc[:, 'F&S'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['f&s']
     
     
     

@@ -88,16 +88,15 @@ def summary_revenue_dist_percent(data_dic, input_dic):
     df = summary_revenue_dist(data_dic, input_dic)
     return df.divide(df.sum(axis='columns'),axis='index')
 
-def summary_avg_aua_dist(data_dic, input_dic):
-    df = combined.total_aua(data_dic, input_dic).groupby('financial_year').mean()
-    avg_aua_funds = df['total_funds_aua']
-    avg_aua_funds.name = 'Funds'
-    avg_aua_shares = df['vantage_shares_aua']
-    avg_aua_shares.name = 'Shares'
-    avg_aua_hlf_amc = df['discretionary_aua']
-    avg_aua_hlf_amc.name = 'HLF AMC'
-    avg_aua_cash = df['vantage_cash_aua']
-    avg_aua_cash.name = 'Cash'
+def summary_avg_aua_dist(data_dic, input_dic, period='financial_year'):
+    if (period == 'financial_year') or (period == 'calendar_year'):
+        df = combined.total_aua(data_dic, input_dic).groupby(period).mean()
+    else:
+        df = combined.total_aua(data_dic, input_dic).groupby(['financial_year',period]).mean()
+    avg_aua_funds = df['Funds']
+    avg_aua_shares = df['Shares']
+    avg_aua_hlf_amc = df['HLF']
+    avg_aua_cash = df['Cash']
     avg_aua_cash_service = df['cash_service_aua']
     avg_aua_cash_service.name = 'Cash Service'
     
@@ -118,8 +117,10 @@ def cash_margin(data_dic, period):
     result = general.convert_fy_quarter_half_index(result, result.index)
     if period=='monthly':
         return result
-    else:
+    elif (period=='financial_year') or (period=='calendar_year'):
         return result.groupby(period).mean().loc[temp:,:]
+    else:
+        return result.groupby(['financial_year',period]).mean().loc[temp:,:]
 
 def hlf_implied_actual_nnb(data_dic, input_dic):
     result = combined.historic_nnb_distribution(data_dic, input_dic)
