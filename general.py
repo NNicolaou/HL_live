@@ -18,10 +18,10 @@ account_aua_headers = ['sipp_aua','isa_aua','fs_aua','sipp_cash_aua','sipp_funds
 new_deposit_service_headers = ['deposit_cash_aua']
 
 disc_known_cols = ['pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua']
-disc_known_values = [3159000000.0,50000000.0,4303000000.0,69000000.0]
+
 
 vantage_known_cols = ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_other_funds_aua','vantage_cash_aua','cash_service_aua']
-vantage_known_values = [2134400000.0,20543600000.0,31692000000.0,7337000000.0]
+
 
 fund_distribution_cols = ['FTSE All Share', 'FTSE All Share TR', 'Eurostoxx 50', 'SP Asia 50', 'S&P500', 'Nikkei 225','FTSE UK Property', 'Cash']
 fund_distribution_values = [0.275,0.275,0.15,0.09,0.13,0.03,0.02,0.03]
@@ -31,7 +31,7 @@ account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
 account_aua_dist = {'sipp':0.33, 'isa':0.4, 'f&s':0.27}
 
 revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
-revenue_known_values = [2800000.0,8300000.0,28000000.0,1400000.0,18500000.0,26300000.0,80500000.0,5400000.0,5150000.0,3900000.0,2150000.0,1500000.0,900000.0,440000.0]
+
 
 growth_revenue_cols = ['advice_fee','currency_revenue','funds_library','interest_on_reserve','management_fee','other_income','renewal_income','stockbroking_commission','stockbroking_income']
 
@@ -39,7 +39,6 @@ growth_costs_cols = ['staff_costs','marketing_distribution','depre_amort_financi
 
 costs_known_cols = ['staff_costs','marketing_distribution','depre_amort_financial','office_running','FSCS_levy','others']
 
-costs_known_values = [-31900000.0,-5800000.0,-3300000.0,-1800000.0,300000.0,-11900000.0, -5000000.0]
 
 client_number_growth_semi = 0.05
 paper_client_pcent = 0.24
@@ -75,7 +74,6 @@ def compute_quarter_half_no(series, _recent_end_year=recent_end_year,_financial_
     It takes two integers and a series
     '''
     
-    # month_end_series = pandas.date_range(prev_weekday(datetime.date(_recent_end_year,_last_result_month+1,1)-datetime.timedelta(days=1)),prev_weekday(datetime.date(_recent_end_year+16,_financial_year_month+1,1)-datetime.timedelta(days=1)),freq='BM')
     quarter = [1,1,1,2,2,2,3,3,3,4,4,4]
     half = [1,1,1,1,1,1,2,2,2,2,2,2]
     
@@ -126,8 +124,8 @@ def fillna_monthly(df):
     '''
     This function return the dataframe with the N/A values filled by the last available data, if there were no last available data, fill it using the next available data.
     '''
-    result = df.fillna(method='ffill').fillna(method='bfill') #.loc[:last_day_prev_month,:]
-    #result = result.reindex(index=month_end_series)
+    result = df.fillna(method='ffill').fillna(method='bfill') 
+    
     return result
 
 def monthly_fulfill(input_dic):
@@ -154,7 +152,6 @@ def compound_growth_rate(rate, freq='Monthly', to_annual=False):
 
         else:
             result = (rate+1)**(1.0/dic[freq]) - 1
-        
         
     elif type(freq) == int:
         if to_annual is True:
