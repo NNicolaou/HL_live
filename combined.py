@@ -163,7 +163,7 @@ def total_aua(dic_data, input_dic):
     final_aua.loc[:,'total_hlf_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_hlf_aua']
     final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'discretionary_aua'] + final_aua.loc[:,'vantage_other_funds_aua']
     
-    def cash_aua_temp(df,y1=50000000, y2=75000000):
+    def cash_aua_temp(df,y1=5000000, y2=10000000):
         test = df['cash_service_aua']
         test[(test.index>='2018-07-31') & (test.index <='2018-12-31')] = y1
         test[(test.index>'2018-12-31')] = y2

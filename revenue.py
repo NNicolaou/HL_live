@@ -75,7 +75,10 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     total_hlf.name='hlf_revenue'              
     result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index) 
     if period == 'month_no':
-        final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:] 
+        if general.last_result_month == 6:
+            final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:] 
+        else:
+            final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year-1:,:],:] 
     else:
         final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
     if general.last_result_month == 6:
@@ -189,7 +192,10 @@ def monthly_revenue(dic_data, input_dic):
     platform_df.name = 'platform_fee'
     pms_advice = pms_advice_fee(dic_data, input_dic, 'month_no')
     pms_advice.name = 'pms_advice'
-    hlf = hlf_amc_daily(dic_data, input_dic, 'month_no').iloc[4:]
+    if general.last_result_month == 6:
+        hlf = hlf_amc_daily(dic_data, input_dic, 'month_no').iloc[4:]
+    else:
+        hlf = hlf_amc_daily(dic_data, input_dic, 'month_no').iloc[11:]
     hlf = hlf.reset_index().set_index(platform_df.index)
     hlf = hlf.drop(['calendar_year','month_no'],axis='columns')
     hlf.columns = ['hlf_amc']
