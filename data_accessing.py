@@ -13,7 +13,7 @@ nnb_data_sheet = ['total nnb','clients']
 assumptions_name = 'control panel.xlsx'
 assumptions_sheet = ['nnb distribution','nnb pcent total asset','compound growth','aua margin','growth rate','tax rate']
 index_hl_data_name = 'index and hl price data.xlsx'
-index_hl_data_sheet = ['Index price', 'HL price']
+index_hl_data_sheet = ['Index price', 'HL price', 'fx_rates']
 report_data_name = 'financial report data.xlsx'
 report_data_sheet = ['revenue','costs','aua']
 

@@ -23,8 +23,11 @@ disc_known_cols = ['pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_
 vantage_known_cols = ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_other_funds_aua','vantage_cash_aua','cash_service_aua']
 
 
-fund_distribution_cols = ['FTSE All Share', 'FTSE All Share TR', 'Eurostoxx 50', 'SP Asia 50', 'S&P500', 'Nikkei 225','FTSE UK Property', 'Cash']
-fund_distribution_values = [0.275,0.275,0.15,0.09,0.13,0.03,0.02,0.03]
+fund_distribution_cols = ['FTSE All Share', 'FTSE All Share TR', 'Eurostoxx 50', 'S&P500', 'Nikkei 225','FTSE UK Property', 'Cash', 'Emerging Europe', 'Emerging Asia', 'China', 'South Korea', 'South America', 'New Zealand', 'Australia', 'Developed Asia']
+fund_distribution_values = [0.265,0.255,0.14,0.15,0.04,0.02,0.03,0.01,0.03,0.01,0.01,0.01,0.005,0.005,0.02]
+
+fund_fx_cols = ['GBPGBP', 'GBPEUR', 'GBPUSD', 'GBPJPY', 'GBPCNY', 'GBPAUD','GBPNZD', 'GBPKRW']
+
 
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
