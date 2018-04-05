@@ -91,6 +91,8 @@ def summary_revenue_dist_percent(data_dic, input_dic):
 def summary_avg_aua_dist(data_dic, input_dic, period='financial_year'):
     if (period == 'financial_year') or (period == 'calendar_year'):
         df = combined.total_aua(data_dic, input_dic).groupby(period).mean()
+    elif period=='month_no':
+        df = combined.total_aua(data_dic, input_dic).groupby(['calendar_year',period]).mean()
     else:
         df = combined.total_aua(data_dic, input_dic).groupby(['financial_year',period]).mean()
     avg_aua_funds = df['Funds']
@@ -197,7 +199,15 @@ def pat_projection(data_dic, input_dic):
     tax_rate.index=final.index
     return final * tax_rate
 
-def hlf_revenue_margin(data_dic, input_dic):
-    df1 = revenue.hlf_amc_daily(data_dic, input_dic, period='month_no')
-    df2 = combined.total_aua(data_dic,input_dic)['discretionary_aua'].groupby(['calendar_year','month_no']).sum()
-    return df1 / df2.reindex(df1.index)
+
+def hlf_revenue_margin(data_dic, input_dic, period):
+    df1 = revenue.hlf_daily_revenue(data_dic, input_dic, period)
+    df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period)
+    df2 = df2.sum(axis='columns')
+    result = df1['hlf_revenue'] / df2
+    return result.loc[idx[general.recent_end_year-1:,:]]
+
+def avg_hlf_size(data_dic, input_dic, period):
+    df = revenue.hlf_daily_fund_size(data_dic, input_dic, period=period)
+    result = df.sum(axis='columns')
+    return result.loc[idx[general.recent_end_year-1:,:]]

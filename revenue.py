@@ -40,7 +40,7 @@ def hlf_amc(dic_data, input_dic, period='half_no'):
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
     return (aua['discretionary_aua'] * (aua_margins['hlf_amc']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
 
-def hlf_amc_daily(dic_data, input_dic, period='half_no'):
+def hlf_daily_fund_size(dic_data, input_dic, period=None):
     test = dic_data['fund size']
     daily_fund_size = test.reindex(index=pandas.date_range(test.index.min(),general.month_end_series.max()))
     daily_fund_size = daily_fund_size.fillna(method='ffill')
@@ -66,14 +66,38 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     temp2.loc[:,:] = portion.values
     nnb = temp2.multiply(nnb,axis='index')
     sliced_fund_size=sliced_fund_size+nnb.cumsum(axis='index')
-    final_fund_size = daily_fund_size.combine_first(sliced_fund_size)              
+    final_fund_size = daily_fund_size.combine_first(sliced_fund_size)
+    if period is not None:
+        final_fund_size = general.convert_fy_quarter_half_index(final_fund_size, final_fund_size.index)
+        if period == 'month_no':
+            final_fund_size = final_fund_size.groupby(['calendar_year',period]).mean()
+        else:
+            final_fund_size = final_fund_size.groupby(['financial_year',period]).mean()
+    
+    return final_fund_size
+
+def hlf_daily_revenue(dic_data, input_dic, period=None):
+    final_fund_size = hlf_daily_fund_size(dic_data, input_dic)           
     select_revenue = final_fund_size[['Select UK Growth Shares','Select UK Income Shares']].sum(axis='columns')
     select_revenue = select_revenue*(0.006/365)
     hlf_revenue = final_fund_size.drop(['Select UK Growth Shares','Select UK Income Shares'], axis='columns').sum(axis='columns')
     hlf_revenue = hlf_revenue*(0.0075/365)              
     total_hlf = select_revenue+hlf_revenue
     total_hlf.name='hlf_revenue'              
-    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index) 
+    result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index)
+    if period is not None:
+        if period == 'month_no':
+            result = result.groupby(['calendar_year',period]).sum()
+        else:
+            result = result.groupby(['financial_year', period]).sum()
+    
+    return result
+
+
+
+def hlf_amc_daily(dic_data, input_dic, period='half_no'):
+               
+    result = hlf_daily_revenue(dic_data, input_dic)
     if period == 'month_no':
         if general.last_result_month == 6:
             final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:] 
