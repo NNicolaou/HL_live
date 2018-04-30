@@ -119,7 +119,7 @@ def aua_analysis(dic_data, input_dic):
     return result.groupby(['financial_year','quarter_no','half_no']).sum()
     
 def nnb_analysis(dic_data, input_dic):
-    df = combined.nnb_distribution(dic_data, input_dic, idx=dic_data['total nnb'].index)
+    df = combined.nnb_distribution(dic_data, input_dic, idx=dic_data['total nnb'].index)   # needs update
     df = general.convert_fy_quarter_half_index(df, index=df.index).groupby(['financial_year','quarter_no','half_no']).sum()
     result = pandas.DataFrame(index=df.index, columns=nnb_cols)
     result.loc[:,'Vantage nnb'] = df.loc[:,'vantage_hl_shares_aua'] + df.loc[:,'vantage_other_shares_aua'] + df.loc[:,'vantage_other_funds_aua'] + df.loc[:,'vantage_hlf_aua'] + df.loc[:,'thirdparty_hlf_aua'] + df.loc[:,'vantage_cash_aua']

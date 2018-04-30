@@ -140,21 +140,111 @@ def total_future_nnb(dic_data, input_dic,idx=general.month_end_series):
 
 
 
-def total_nnb(dic_data, input_dic, idx=general.month_end_series):
-    return total_historic_nnb(dic_data, input_dic, idx) + total_future_nnb(dic_data, input_dic, idx)
-    
-def nnb_distribution(dic_data, input_dic,idx=general.month_end_series):
+def total_nnb(dic_data, input_dic, idx=general.month_end_series, opt=None):
+    df = total_historic_nnb(dic_data, input_dic, idx) + total_future_nnb(dic_data, input_dic, idx)
+    if opt is None:
+        return df
+    else:
+        if opt == 'financial_year' or opt == 'calendar_year':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum()
+        elif opt == 'month_no':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum()
+        else:
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum()
+        
+def nnb_distribution(dic_data, input_dic,idx=general.month_end_series, opt=None):
     total = total_nnb(dic_data,input_dic,idx)
     result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=idx).multiply(total['NNB'], axis='index')
     result.iloc[0,:] = 0
-    return result
+    if opt is None:
+        return result
+    else:
+        if opt == 'financial_year' or opt == 'calendar_year':
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum()
+        elif opt == 'month_no':
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum()
+        else:
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum()
+
+def total_client_predt(dic_data, input_dic):
+    clients = general.convert_fy_quarter_half_index(dic_data['clients'],dic_data['clients'].index)
+    clients = clients.groupby(['financial_year','quarter_no']).sum()
+    predt_clients = clients['No. of clients'].copy()
+    
+    nnc_pcent = input_dic['nnc pcent total client']
+    nnc_pcent = general.convert_fy_quarter_half_index(nnc_pcent,nnc_pcent.index).groupby(['financial_year','quarter_no']).sum()
+    
+    for i in range(1,predt_clients.size):
+        if ~numpy.isnan(predt_clients.iloc[i-1]) & numpy.isnan(predt_clients.iloc[i]):
+            predt_clients.iloc[i] = round((predt_clients.iloc[i-1] * (1+nnc_pcent['nnc pcent total client'].iloc[i]))-0.5,0)
+    return predt_clients
+
+def net_new_client_predt(dic_data, input_dic):
+    p_cs = total_client_predt(dic_data, input_dic)
+    net_new_clients = p_cs - p_cs.shift(1)
+    return net_new_clients
+            
+def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
+    nnb = general.convert_fy_quarter_half_index(dic_data['total nnb'],dic_data['total nnb'].index)
+    nnb = nnb.groupby(['financial_year','quarter_no']).sum()
+    net_new_clients = net_new_client_predt(dic_data, input_dic)
+    
+    nnb_c = nnb['NNB'].copy()
+    for j in range(1,nnb_c.size):
+        if numpy.isnan(nnb_c.iloc[j]) & ~numpy.isnan(nnb_c.iloc[j-1]):
+            nnb_c.iloc[j] = (nnb_c.iloc[j-1] * (1+(0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
+    
+    # converting quarter nnb to monthly
+    month_nnb_dist = pandas.DataFrame(columns=['% dist'], index=general.month_end_series)
+    month_nnb_c = general.convert_fy_quarter_half_index(month_nnb_dist,month_nnb_dist.index).reset_index()
+    dist_nnb = {33:0.5,44:0.5,32:0.25,31:0.25,45:0.25,46:0.25,17:1.0/3,18:1.0/3,19:1.0/3,210:1.0/3,211:1.0/3,212:1.0/3 }
+    month_nnb_dist['% dist'] = month_nnb_c['quarter_no'].replace(dist_nnb).values
+    month_nnb_c['temp'] = (month_nnb_c['quarter_no'].map(str) + month_nnb_c['month_no'].map(str)).map(int)
+    month_nnb_dist['% dist'] = month_nnb_c['temp'].replace(dist_nnb).values
+    month_nnb_c['temp2'] = (month_nnb_c['financial_year'].map(str) + month_nnb_c['quarter_no'].map(str)).map(int)
+    nnb_working = nnb_c.reset_index()
+    nnb_working['temp'] = (nnb_working['financial_year'].map(str) + nnb_working['quarter_no'].map(str)).map(int)
+    nnb_working = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['NNB']
+    month_nnb_dist['nnb'] = month_nnb_c['temp2'].replace(nnb_working).values
+    month_nnb_dist['NNB'] = month_nnb_dist['nnb'] * month_nnb_dist['% dist']
+    df = month_nnb_dist.drop(['% dist', 'nnb'], axis='columns')
+    if opt is None:
+        return df
+    else:
+        if opt == 'financial_year' or opt == 'calendar_year':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum()
+        elif opt == 'month_no':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum()
+        else:
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum()
+ 
+def total_nnb_distribution_clientAlgo(dic_data, input_dic):
+    total = total_nnb_clientAlgo(dic_data, input_dic)
+    result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=general.month_end_series).multiply(total['NNB'], axis='index')
+    result.iloc[0,:] = 0
+    if opt is None:
+        return result
+    else:
+        if opt == 'financial_year' or opt == 'calendar_year':
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum()
+        elif opt == 'month_no':
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum()
+        else:
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum()
 
 def total_aua(dic_data, input_dic):
-    future = total_future_aua(dic_data, input_dic)
+    # ====== old hlf algo=======================
+    # future = total_future_aua(dic_data, input_dic)
+    # future.loc[general.last_day_prev_month,:] = 0.0
+    # past = total_historic_aua(dic_data, input_dic)
+    # final_aua = future.fillna(0.0) + past.fillna(0.0)
+    
+    # ======== new net new client algo ===============
+    future = future_aua(dic_data, input_dic)
     future.loc[general.last_day_prev_month,:] = 0.0
-    past = total_historic_aua(dic_data, input_dic)
-    final_aua = future.fillna(0.0) + past.fillna(0.0)
-
+    past = historic_aua(dic_data, input_dic)
+    final_aua = future.fillna(0.0) + past.fillna(0.0) + total_nnb_distribution_clientAlgo(dic_data, input_dic).cumsum()
+    
     final_aua.loc[:,'hlf_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua']
     final_aua.loc[:,'pms_aua'] = final_aua.loc[:,'pms_others_aua'] + final_aua.loc[:,'pms_hlf_aua']
     final_aua.loc[:,'discretionary_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_aua']

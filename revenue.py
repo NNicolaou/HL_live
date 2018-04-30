@@ -148,13 +148,24 @@ def cash_interest_margin(dic_data):
     margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * 0.0005)
     return margin
 
-def paper_statement_revenue(dic_data):
-    df = general.fillna_monthly(dic_data['clients']).reindex(index=general.semi_annual_series)
-    df2 = pandas.DataFrame(general.client_number_growth_semi, index=df.index, columns=df.columns)
-    df2.iloc[0,:] = 0
-    result = ((df2+1).cumprod()).multiply(df,axis='index') * general.paper_client_pcent * general.paper_charge_semi
+def paper_statement_revenue(dic_data, input_dic):
+    #================== old hlf algo correspond=====================
+    # df = general.fillna_monthly(dic_data['clients']).reindex(index=general.semi_annual_series)
+    # df2 = pandas.DataFrame(general.client_number_growth_semi, index=df.index, columns=df.columns)
+    # df2.iloc[0,:] = 0
+    # result = ((df2+1).cumprod()).multiply(df,axis='index') * general.paper_client_pcent * general.paper_charge_semi
+    # result.columns=['paper_income']
+    # return result['paper_income']
+    test = pandas.DataFrame(index=general.semi_annual_series, columns=['clients'])
+    test = general.convert_fy_quarter_half_index(test, general.semi_annual_series)
+    
+    clients = combined.total_client_predt(dic_data, input_dic)
+    clients = clients.reindex(index=test.groupby(['financial_year','quarter_no']).sum().index)
+    df = clients.reset_index().set_index(general.semi_annual_series).drop(['financial_year','quarter_no'], axis='columns')
+    result = df * general.paper_client_pcent * general.paper_charge_semi
     result.columns=['paper_income']
     return result['paper_income']
+
 
 
 def growth_revenues(input_dic):
@@ -190,7 +201,7 @@ def semi_revenue(dic_data, input_dic):
     series[0] = 0
     df.loc[:,'interest_on_cash'] = df.loc[:,'interest_on_cash'].fillna(0) + series.values
     
-    series = paper_statement_revenue(dic_data)
+    series = paper_statement_revenue(dic_data, input_dic)
     series[0] = 0
     df.loc[:,'paper_income'] = df.loc[:,'paper_income'].fillna(0) + series.values
     
