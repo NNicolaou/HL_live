@@ -40,7 +40,7 @@ def future_nnb_distribution(dic_data, input_dic):
 def total_historic_aua(dic_data, input_dic):
     aua = historic_aua(dic_data, input_dic)
     #nnb = historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')
-    nnb = compounded_historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')
+    nnb = compounded_historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')   # new nnb algo
     
     result = aua + nnb.loc[:,aua.columns]
     return result
@@ -57,7 +57,7 @@ def future_aua(dic_data, input_dic):
 
 def total_future_aua(dic_data, input_dic):
     aua = future_aua(dic_data, input_dic)
-    nnb = future_nnb_distribution(dic_data, input_dic).cumsum(axis='index')
+    nnb = future_nnb_distribution(dic_data, input_dic).cumsum(axis='index')    # new nnb algo
     
     result = aua + nnb.loc[:,aua.columns]
     return result
