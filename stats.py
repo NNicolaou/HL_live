@@ -55,7 +55,7 @@ def total_aua(data_dic, input_dic):
     else:
         temp = general.recent_end_year
     result = test[test.index.month==general.financial_year_month]['total_assets_aua']
-    result =  general.convert_fy_quarter_half_index(result, result.index).groupby('financial_year').sum()['total_assets_aua'].loc[temp:]
+    result =  general.convert_fy_quarter_half_index(result, result.index).groupby('financial_year').sum(min_count=1)['total_assets_aua'].loc[temp:]
     result.name='Total AUA'
     return result
 '''
@@ -143,13 +143,13 @@ def hlf_to_date_implied_nnb(data_dic,typ=None, fund_opt=None):
     if typ=='day':
         return df[df.index<=pandas.to_datetime(datetime.datetime.today())]
     elif typ=='month':
-        return result.groupby(['calendar_year','month_no']).sum()
+        return result.groupby(['calendar_year','month_no']).sum(min_count=1)
     elif typ=='quarter':
-        return result.groupby(['financial_year','quarter_no']).sum()
+        return result.groupby(['financial_year','quarter_no']).sum(min_count=1)
     elif typ=='semi-annual':
-        return result.groupby(['financial_year','half_no']).sum()
+        return result.groupby(['financial_year','half_no']).sum(min_count=1)
     elif typ=='annual':
-        return result.groupby('financial_year').sum()
+        return result.groupby('financial_year').sum(min_count=1)
     else:
         return result
     
@@ -177,13 +177,13 @@ def hlf_to_date_unit_change(data_dic, unit_type, typ=None, fund_opt=None):
     if typ=='day':
         return result2[result2.index<=pandas.to_datetime(datetime.datetime.today())]
     elif typ=='month':
-        return result.groupby(['calendar_year','month_no']).sum()
+        return result.groupby(['calendar_year','month_no']).sum(min_count=1)
     elif typ=='quarter':
-        return result.groupby(['financial_year','quarter_no']).sum()
+        return result.groupby(['financial_year','quarter_no']).sum(min_count=1)
     elif typ=='semi-annual':
-        return result.groupby(['financial_year','half_no']).sum()
+        return result.groupby(['financial_year','half_no']).sum(min_count=1)
     elif typ=='annual':
-        return result.groupby('financial_year').sum()
+        return result.groupby('financial_year').sum(min_count=1)
     else:
         return result
     
@@ -201,11 +201,18 @@ def pat_projection(data_dic, input_dic):
 
 
 def hlf_revenue_margin(data_dic, input_dic, period):
-    df1 = revenue.hlf_daily_revenue(data_dic, input_dic, period)
-    df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period)
-    df2 = df2.sum(axis='columns')
-    result = df1['hlf_revenue'] / df2
-    return result.loc[idx[general.recent_end_year-1:,:]]
+    if period is not None:
+        df1 = revenue.hlf_daily_revenue(data_dic, input_dic, period)
+        df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period)
+        df2 = df2.sum(min_count=1,axis='columns')
+        
+        return result.loc[idx[general.recent_end_year-1:,:]]
+    else:
+        df1 = revenue.hlf_daily_revenue(data_dic, input_dic, period).reset_index().set_index('month_end')
+        df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period).sum(min_count=1,axis='columns')
+        df2.index.name='month_end'
+        return df1['hlf_revenue'] / df2
+    
 
 def avg_hlf_size(data_dic, input_dic, period):
     df = revenue.hlf_daily_fund_size(data_dic, input_dic, period=period)

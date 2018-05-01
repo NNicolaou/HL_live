@@ -32,8 +32,8 @@ def annual_costs(input_dic, cal_year=False):
     df = semi_costs(input_dic)
     if cal_year is False:
         if general.last_result_month == 6:
-            return df.groupby('financial_year').sum().iloc[1:,:]
+            return df.groupby('financial_year').sum(min_count=1).iloc[1:,:]
         else:
-            return df.groupby('financial_year').sum()
+            return df.groupby('financial_year').sum(min_count=1)
     else:
-        return df.groupby('calendar_year').sum().iloc[1:,:]
+        return df.groupby('calendar_year').sum(min_count=1).iloc[1:,:]

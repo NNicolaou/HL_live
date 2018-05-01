@@ -75,7 +75,7 @@ def fair_value(dic_data, input_dic,now=False, dcf_p=dcf_period,disc_rate = disco
     hl = pandas.DataFrame(index=['Terminal value','Enterprise value', 'Net debt&cash','Fair value','No. of shares','Fair value per share'], columns=['HL'])
     terminal_value = (df.loc['Free cash flow',dcf_end]*(1+pep_rate)) / (disc_rate-pep_rate)
     hl.loc['Terminal value',:] = terminal_value
-    enterprise_value = df.loc['Discounted cash flow',:].sum() + (terminal_value/((1+disc_rate)**dcf_period))
+    enterprise_value = df.loc['Discounted cash flow',:].sum(min_count=1) + (terminal_value/((1+disc_rate)**dcf_period))
     hl.loc['Enterprise value',:] = enterprise_value
     hl.loc['Net debt&cash',:] = net_debt_cash
     hl.loc['Fair value',:] = enterprise_value + net_debt_cash
@@ -89,7 +89,7 @@ def report_reformat(typ, year=dcf_start_year-1,cal_year=False):
     '''
     df = general.convert_fy_quarter_half_index(data_accessing.report_data[typ],data_accessing.report_data[typ].index)
     if cal_year is False:
-        return df.groupby('financial_year').sum().loc[year,:]
+        return df.groupby('financial_year').sum(min_count=1).loc[year,:]
     else:
-        return df.groupby('calendar_year').sum().loc[year,:]
+        return df.groupby('calendar_year').sum(min_count=1).loc[year,:]
     
