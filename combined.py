@@ -146,33 +146,33 @@ def total_nnb(dic_data, input_dic, idx=general.month_end_series, opt=None):
         return df
     else:
         if opt == 'financial_year' or opt == 'calendar_year':
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum(min_count=1)
         elif opt == 'month_no':
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum(min_count=1)
         else:
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum(min_count=1)
         
 def nnb_distribution(dic_data, input_dic,idx=general.month_end_series, opt=None):
-    total = total_nnb(dic_data,input_dic,idx)
+    total = total_nnb(dic_data,input_dic,idx, opt)
     result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=idx).multiply(total['NNB'], axis='index')
     result.iloc[0,:] = 0
     if opt is None:
         return result
     else:
         if opt == 'financial_year' or opt == 'calendar_year':
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum(min_count=1)
         elif opt == 'month_no':
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum(min_count=1)
         else:
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum(min_count=1)
 
 def total_client_predt(dic_data, input_dic):
     clients = general.convert_fy_quarter_half_index(dic_data['clients'],dic_data['clients'].index)
-    clients = clients.groupby(['financial_year','quarter_no']).sum()
+    clients = clients.groupby(['financial_year','quarter_no']).sum(min_count=1)
     predt_clients = clients['No. of clients'].copy()
     
     nnc_pcent = input_dic['nnc pcent total client']
-    nnc_pcent = general.convert_fy_quarter_half_index(nnc_pcent,nnc_pcent.index).groupby(['financial_year','quarter_no']).sum()
+    nnc_pcent = general.convert_fy_quarter_half_index(nnc_pcent,nnc_pcent.index).groupby(['financial_year','quarter_no']).sum(min_count=1)
     
     for i in range(1,predt_clients.size):
         if ~numpy.isnan(predt_clients.iloc[i-1]) & numpy.isnan(predt_clients.iloc[i]):
@@ -186,7 +186,7 @@ def net_new_client_predt(dic_data, input_dic):
             
 def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
     nnb = general.convert_fy_quarter_half_index(dic_data['total nnb'],dic_data['total nnb'].index)
-    nnb = nnb.groupby(['financial_year','quarter_no']).sum()
+    nnb = nnb.groupby(['financial_year','quarter_no']).sum(min_count=1)
     net_new_clients = net_new_client_predt(dic_data, input_dic)
     
     nnb_c = nnb['NNB'].copy()
@@ -212,25 +212,25 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
         return df
     else:
         if opt == 'financial_year' or opt == 'calendar_year':
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum(min_count=1)
         elif opt == 'month_no':
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum(min_count=1)
         else:
-            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum(min_count=1)
  
-def total_nnb_distribution_clientAlgo(dic_data, input_dic):
-    total = total_nnb_clientAlgo(dic_data, input_dic)
+def total_nnb_distribution_clientAlgo(dic_data, input_dic, opt=None):
+    total = total_nnb_clientAlgo(dic_data, input_dic, opt)
     result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=general.month_end_series).multiply(total['NNB'], axis='index')
     result.iloc[0,:] = 0
     if opt is None:
         return result
     else:
         if opt == 'financial_year' or opt == 'calendar_year':
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(opt).sum(min_count=1)
         elif opt == 'month_no':
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['calendar_year',opt]).sum(min_count=1)
         else:
-            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum()
+            return general.convert_fy_quarter_half_index(result, result.index).groupby(['financial_year',opt]).sum(min_count=1)
 
 def total_aua(dic_data, input_dic):
     # ====== old hlf algo=======================

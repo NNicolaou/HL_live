@@ -18,9 +18,9 @@ def cash_service(dic_data, input_dic, period='half_no'):
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
-        result = net_revenue.groupby(period).sum()
+        result = net_revenue.groupby(period).sum(min_count=1)
     else:
-        result = net_revenue.groupby(['financial_year',period]).sum()
+        result = net_revenue.groupby(['financial_year',period]).sum(min_count=1)
     return result#.map(general.compound_growth_rate))
 
 def platform_fee(dic_data, input_dic, period='half_no'):
@@ -30,15 +30,15 @@ def platform_fee(dic_data, input_dic, period='half_no'):
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
-        result = net_revenue.groupby(period).sum()
+        result = net_revenue.groupby(period).sum(min_count=1)
     else:
-        result = net_revenue.groupby(['financial_year',period]).sum()
+        result = net_revenue.groupby(['financial_year',period]).sum(min_count=1)
     return result#.map(general.compound_growth_rate))
 
 def hlf_amc(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
-    return (aua['discretionary_aua'] * (aua_margins['hlf_amc']/12)).groupby(['financial_year',period]).sum()#.map(general.compound_growth_rate))
+    return (aua['discretionary_aua'] * (aua_margins['hlf_amc']/12)).groupby(['financial_year',period]).sum(min_count=1)#.map(general.compound_growth_rate))
 
 def hlf_daily_fund_size(dic_data, input_dic, period=None):
     test = dic_data['fund size']
@@ -60,7 +60,7 @@ def hlf_daily_fund_size(dic_data, input_dic, period=None):
     count_map.iloc[0,:] = 30              
     temp['count'] = temp['key'].map(count_map.to_dict()['nnb'])
     temp['nnb'] = temp['nnb'] / temp['count']          
-    portion = daily_fund_size.loc[pandas.to_datetime('today'),:] / daily_fund_size.loc[pandas.to_datetime('today'),:].sum()
+    portion = daily_fund_size.loc[pandas.to_datetime('today'),:] / daily_fund_size.loc[pandas.to_datetime('today'),:].sum(min_count=1)
     nnb = temp['nnb']         
     temp2 = pandas.DataFrame(columns=portion.index,index=nnb.index)
     temp2.loc[:,:] = portion.values
@@ -87,9 +87,9 @@ def hlf_daily_revenue(dic_data, input_dic, period=None):
     result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index)
     if period is not None:
         if period == 'month_no':
-            result = result.groupby(['calendar_year',period]).sum()
+            result = result.groupby(['calendar_year',period]).sum(min_count=1)
         else:
-            result = result.groupby(['financial_year', period]).sum()
+            result = result.groupby(['financial_year', period]).sum(min_count=1)
     
     return result
 
@@ -100,11 +100,11 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     result = hlf_daily_revenue(dic_data, input_dic)
     if period == 'month_no':
         if general.last_result_month == 6:
-            final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year:,:],:] 
+            final_result = result.groupby(['calendar_year',period]).sum(min_count=1).loc[idx[general.recent_end_year:,:],:] 
         else:
-            final_result = result.groupby(['calendar_year',period]).sum().loc[idx[general.recent_end_year-1:,:],:] 
+            final_result = result.groupby(['calendar_year',period]).sum(min_count=1).loc[idx[general.recent_end_year-1:,:],:] 
     else:
-        final_result = result.groupby(['financial_year',period]).sum().loc[idx[general.recent_end_year:,:],:]
+        final_result = result.groupby(['financial_year',period]).sum(min_count=1).loc[idx[general.recent_end_year:,:],:]
     if general.last_result_month == 6:
         final_result = final_result.drop((general.recent_end_year,1),axis='index')
     final_result = final_result.stack()      
@@ -122,9 +122,9 @@ def pms_advice_fee(dic_data, input_dic, period='half_no'):
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
-        result = net_revenue.groupby(period).sum()
+        result = net_revenue.groupby(period).sum(min_count=1)
     else:
-        result = net_revenue.groupby(['financial_year',period]).sum()
+        result = net_revenue.groupby(['financial_year',period]).sum(min_count=1)
     return result#.map(general.compound_growth_rate))
 
 def cash_interest(dic_data, input_dic, period='half_no'):
@@ -137,9 +137,9 @@ def cash_interest(dic_data, input_dic, period='half_no'):
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
-        result = net_revenue.groupby(period).sum()
+        result = net_revenue.groupby(period).sum(min_count=1)
     else:
-        result = net_revenue.groupby(['financial_year',period]).sum()
+        result = net_revenue.groupby(['financial_year',period]).sum(min_count=1)
     return result
 
 def cash_interest_margin(dic_data):
@@ -160,7 +160,7 @@ def paper_statement_revenue(dic_data, input_dic):
     test = general.convert_fy_quarter_half_index(test, general.semi_annual_series)
     
     clients = combined.total_client_predt(dic_data, input_dic)
-    clients = clients.reindex(index=test.groupby(['financial_year','quarter_no']).sum().index)
+    clients = clients.reindex(index=test.groupby(['financial_year','quarter_no']).sum(min_count=1).index)
     df = clients.reset_index().set_index(general.semi_annual_series).drop(['financial_year','quarter_no'], axis='columns')
     result = df * general.paper_client_pcent * general.paper_charge_semi
     result.columns=['paper_income']
@@ -212,11 +212,11 @@ def annual_revenue(dic_data, input_dic, cal_year=False):
     df = semi_revenue(dic_data, input_dic)
     if cal_year is False:
         if general.last_result_month == 6:
-            return df.groupby('financial_year').sum().iloc[1:,:]
+            return df.groupby('financial_year').sum(min_count=1).iloc[1:,:]
         else:
-            return df.groupby('financial_year').sum()
+            return df.groupby('financial_year').sum(min_count=1)
     else:
-        return df.groupby('calendar_year').sum().iloc[1:,:]
+        return df.groupby('calendar_year').sum(min_count=1).iloc[1:,:]
     
 def monthly_revenue(dic_data, input_dic):
     cash_df = cash_interest(dic_data, input_dic,'month_no')

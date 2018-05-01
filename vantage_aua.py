@@ -52,7 +52,7 @@ def other_funds_composite_return(dic_data):
     df.iloc[0,:]=general.fund_distribution_values
     df.sort_index(axis='columns',inplace=True)
     df = df.fillna(method='ffill')
-    index_price = dic_data['Index price'].loc[:,general.fund_distribution_cols].reindex(index=general.month_end_series).sort_index(axis='columns')
+    index_price = dic_data['Index price'].reindex(general.fund_distribution_cols,axis='columns').reindex(index=general.month_end_series).sort_index(axis='columns')
     index_return = index_price / index_price.shift(1).fillna(method='bfill')-1
     index_return.loc[:,'Cash']=0.0
     
