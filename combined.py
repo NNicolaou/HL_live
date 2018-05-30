@@ -183,7 +183,71 @@ def net_new_client_predt(dic_data, input_dic):
     p_cs = total_client_predt(dic_data, input_dic)
     net_new_clients = p_cs - p_cs.shift(1)
     return net_new_clients
-            
+
+def total_nnb_ci_clientAlgo(dic_data, input_dic, opt=None):
+    nnb = general.convert_fy_quarter_half_index(dic_data['total nnb'],dic_data['total nnb'].index)
+    nnb = nnb.groupby(['financial_year','quarter_no']).sum(min_count=1)
+    net_new_clients = net_new_client_predt(dic_data, input_dic)
+    
+    nnb['Lower bound'] = nnb['NNB'].values
+    nnb['Upper bound'] = nnb['NNB'].values
+    
+    for j in range(1,nnb.index.size):
+        if numpy.isnan(nnb.iloc[j,0]) & ~numpy.isnan(nnb.iloc[j-1,0]):
+            nnb.iloc[j,0] = (nnb.iloc[j-1,0] * (1+(0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
+    for j in range(1,nnb.index.size):
+        if numpy.isnan(nnb.iloc[j,1]) & ~numpy.isnan(nnb.iloc[j-1,1]):
+            nnb.iloc[j,1] = (nnb.iloc[j-1,0] * (1+((0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))-2*0.0618)))
+    
+    for j in range(1,nnb.index.size):
+        if numpy.isnan(nnb.iloc[j,2]) & ~numpy.isnan(nnb.iloc[j-1,2]):
+            nnb.iloc[j,2] = (nnb.iloc[j-1,0] * (1+((0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))+2*0.0618)))
+    
+    df = convert_quarter_to_month_nnb(nnb, opt='Confidence interval')
+    if opt is None:
+        return df
+    else:
+        if opt == 'financial_year' or opt == 'calendar_year':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(opt).sum(min_count=1)
+        elif opt == 'month_no':
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum(min_count=1)
+        else:
+            return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum(min_count=1)
+
+def convert_quarter_to_month_nnb(nnb_c, opt=None):
+    month_nnb_dist = pandas.DataFrame(columns=['% dist'], index=general.month_end_series)
+    month_nnb_c = general.convert_fy_quarter_half_index(month_nnb_dist,month_nnb_dist.index).reset_index()
+    dist_nnb = {33:0.5,44:0.5,32:0.25,31:0.25,45:0.25,46:0.25,17:1.0/3,18:1.0/3,19:1.0/3,210:1.0/3,211:1.0/3,212:1.0/3 }
+    month_nnb_dist['% dist'] = month_nnb_c['quarter_no'].replace(dist_nnb).values
+    month_nnb_c['temp'] = (month_nnb_c['quarter_no'].map(str) + month_nnb_c['month_no'].map(str)).map(int)
+    month_nnb_dist['% dist'] = month_nnb_c['temp'].replace(dist_nnb).values
+    month_nnb_c['temp2'] = (month_nnb_c['financial_year'].map(str) + month_nnb_c['quarter_no'].map(str)).map(int)
+    nnb_working = nnb_c.reset_index()
+    nnb_working['temp'] = (nnb_working['financial_year'].map(str) + nnb_working['quarter_no'].map(str)).map(int)
+    if opt is None:
+        nnb_working = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['NNB']
+        month_nnb_dist['nnb'] = month_nnb_c['temp2'].replace(nnb_working).values
+        month_nnb_dist['NNB'] = month_nnb_dist['nnb'] * month_nnb_dist['% dist']
+        
+        df = month_nnb_dist.drop(['% dist', 'nnb'], axis='columns')
+    elif opt == 'Confidence interval':
+        nnb_w = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['NNB']
+        nnb_lower = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['Lower bound']
+        nnb_upper = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['Upper bound']
+        month_nnb_dist['nnb'] = month_nnb_c['temp2'].replace(nnb_w).values
+        month_nnb_dist['nnb_lower'] = month_nnb_c['temp2'].replace(nnb_lower).values
+        month_nnb_dist['nnb_upper'] = month_nnb_c['temp2'].replace(nnb_upper).values
+        month_nnb_dist['NNB'] = month_nnb_dist['nnb'] * month_nnb_dist['% dist']
+        month_nnb_dist['Lower bound'] = month_nnb_dist['nnb_lower'] * month_nnb_dist['% dist']
+        month_nnb_dist['Upper bound'] = month_nnb_dist['nnb_upper'] * month_nnb_dist['% dist']
+        
+        df = month_nnb_dist.drop(['% dist', 'nnb', 'nnb_lower', 'nnb_upper'], axis='columns')
+    
+    return df
+    
+    
+    
+    
 def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
     nnb = general.convert_fy_quarter_half_index(dic_data['total nnb'],dic_data['total nnb'].index)
     nnb = nnb.groupby(['financial_year','quarter_no']).sum(min_count=1)
@@ -195,19 +259,7 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
             nnb_c.iloc[j] = (nnb_c.iloc[j-1] * (1+(0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
     
     # converting quarter nnb to monthly
-    month_nnb_dist = pandas.DataFrame(columns=['% dist'], index=general.month_end_series)
-    month_nnb_c = general.convert_fy_quarter_half_index(month_nnb_dist,month_nnb_dist.index).reset_index()
-    dist_nnb = {33:0.5,44:0.5,32:0.25,31:0.25,45:0.25,46:0.25,17:1.0/3,18:1.0/3,19:1.0/3,210:1.0/3,211:1.0/3,212:1.0/3 }
-    month_nnb_dist['% dist'] = month_nnb_c['quarter_no'].replace(dist_nnb).values
-    month_nnb_c['temp'] = (month_nnb_c['quarter_no'].map(str) + month_nnb_c['month_no'].map(str)).map(int)
-    month_nnb_dist['% dist'] = month_nnb_c['temp'].replace(dist_nnb).values
-    month_nnb_c['temp2'] = (month_nnb_c['financial_year'].map(str) + month_nnb_c['quarter_no'].map(str)).map(int)
-    nnb_working = nnb_c.reset_index()
-    nnb_working['temp'] = (nnb_working['financial_year'].map(str) + nnb_working['quarter_no'].map(str)).map(int)
-    nnb_working = (nnb_working.set_index('temp').drop(['financial_year','quarter_no'],axis='columns')).to_dict()['NNB']
-    month_nnb_dist['nnb'] = month_nnb_c['temp2'].replace(nnb_working).values
-    month_nnb_dist['NNB'] = month_nnb_dist['nnb'] * month_nnb_dist['% dist']
-    df = month_nnb_dist.drop(['% dist', 'nnb'], axis='columns')
+    df = convert_quarter_to_month_nnb(nnb_c)
     if opt is None:
         return df
     else:
@@ -217,7 +269,7 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
             return general.convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year',opt]).sum(min_count=1)
         else:
             return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum(min_count=1)
- 
+
 def total_nnb_distribution_clientAlgo(dic_data, input_dic, opt=None):
     total = total_nnb_clientAlgo(dic_data, input_dic, opt)
     result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=general.month_end_series).multiply(total['NNB'], axis='index')
