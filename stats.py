@@ -10,6 +10,7 @@ import revenue
 import costs
 import data_accessing
 import discf
+import consolidated
 '''
 FY annual statistics
 '''
@@ -218,3 +219,16 @@ def avg_hlf_size(data_dic, input_dic, period):
     df = revenue.hlf_daily_fund_size(data_dic, input_dic, period=period)
     result = df.sum(axis='columns')
     return result.loc[idx[general.recent_end_year-1:,:]]
+
+def quarter_revenue(data_dic, input_dic):
+    df = consolidated.revenue_analysis(data_dic, input_dic).reset_index()
+    dic = {1: 0.5, 2:4.0/6}
+    dic2 = {2:3, 1:1}
+    dic3 = {1: 1, 2:0}
+    df['quarter_dist'] = df['half_no'].map(dic)
+    df['quarter_no'] = df['half_no'].map(dic2)
+    df['year_to_date_dist'] = df['half_no'].map(dic3)
+    df['Total quarter revenue'] = df['Total revenue'] * df['quarter_dist']
+    df['Year_to_date_revenue'] = ((df['Total revenue'] * df['year_to_date_dist']).shift(1)).fillna(0) + df['Total quarter revenue']
+    result = df[['quarter_no','financial_year','calendar_year','Total quarter revenue','Year_to_date_revenue']]
+    return result.set_index(['quarter_no','financial_year','calendar_year']).iloc[idx[1::,:]]
