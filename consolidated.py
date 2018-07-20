@@ -17,6 +17,7 @@ nnb_cols = ['Vantage nnb','PMS nnb','HLMM Funds nnb','Cash Service nnb']
 
 def revenue_analysis(dic_data, input_dic):
     
+    # without currency revenue and interest on reserve
     _revenue = revenue.semi_revenue(dic_data, input_dic)
         
         
