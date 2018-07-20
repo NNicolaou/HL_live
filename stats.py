@@ -16,6 +16,7 @@ FY annual statistics
 '''
 
 def total_revenue(data_dic, input_dic, cal=False):
+    # including currency and interest on reserve
     result = revenue.annual_revenue(data_dic,input_dic,cal).sum(axis='columns')
     result.name = 'Total Revenue'
     return result
