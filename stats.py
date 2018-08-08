@@ -208,7 +208,7 @@ def hlf_revenue_margin(data_dic, input_dic, period):
         df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period)
         df2 = df2.sum(min_count=1,axis='columns')
         
-        return result.loc[idx[general.recent_end_year-1:,:]]
+        return (df1['hlf_revenue'] / df2).loc[idx[general.recent_end_year-1:,:]]
     else:
         df1 = revenue.hlf_daily_revenue(data_dic, input_dic, period).reset_index().set_index('month_end')
         df2 = revenue.hlf_daily_fund_size(data_dic, input_dic, period).sum(min_count=1,axis='columns')
