@@ -68,12 +68,15 @@ def other_funds_aua(dic_data, df=aua_frame):
     return aua_frame['vantage_other_funds_aua'].fillna(method='ffill').multiply((composite_returns+1).cumprod())
    
     
-def compute_historic_aua(dic_data, input_dic, df=aua_frame):
+def compute_historic_aua(dic_data, df=aua_frame):
     final_aua = aua_frame.copy()
     final_aua.loc[:,'vantage_hl_shares_aua'] = hl_shares_aua(dic_data)
     final_aua.loc[:,'vantage_other_shares_aua'] = other_shares_aua(dic_data)
     final_aua.loc[:,'vantage_other_funds_aua'] = other_funds_aua(dic_data)
-    final_aua = final_aua.loc[:general.last_day_prev_month,:].fillna(method='ffill').reindex(index=general.month_end_series)    
+    final_aua = final_aua.loc[:general.last_day_prev_month,:].fillna(method='ffill').reindex(index=general.month_end_series)
+    # cash service growth rate
+    final_aua.loc[:,'cash_service_aua'] = final_aua['cash_service_aua'].fillna(method='ffill').multiply(other_funds_composite_return(dic_data).where(other_funds_composite_return(dic_data).isnull(),1.0))
+    
     return final_aua
     
     

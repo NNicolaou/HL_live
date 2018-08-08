@@ -7,8 +7,8 @@ idx = pandas.IndexSlice
 '''
 Inputs
 '''
-recent_end_year = 2017    # Calendar year
-last_result_month = 12
+recent_end_year = 2018    # Calendar year
+last_result_month = 6
 financial_year_month = 6
 discretionary_aua_headers = ['pms_aua', 'pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua','hlf_aua','discretionary_aua']
                       
@@ -18,7 +18,7 @@ account_aua_headers = ['sipp_aua','isa_aua','fs_aua','sipp_cash_aua','sipp_funds
 new_deposit_service_headers = ['deposit_cash_aua']
 
 disc_known_cols = ['pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua']
-
+hlf_known_cols = ['pms_hlf_aua','vantage_hlf_aua','thirdparty_hlf_aua']
 
 vantage_known_cols = ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_other_funds_aua','vantage_cash_aua','cash_service_aua']
 

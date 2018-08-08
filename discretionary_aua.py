@@ -53,8 +53,10 @@ def get_acc_composite_mul(dic_data):
     result = (composite_return+1).cumprod()
     return result
 
-def compute_historic_aua(dic_data, input_dic, df=aua_frame):
+def compute_historic_aua(dic_data, df=aua_frame):
     composite_mul = get_acc_composite_mul(dic_data)
-    final_aua = aua_frame.fillna(method='ffill').multiply(composite_mul,axis='index')
+    final_aua = aua_frame.fillna(method='ffill').loc[:,general.hlf_known_cols].multiply(composite_mul,axis='index')
+    srs = aua_frame['pms_others_aua'].fillna(method='ffill').multiply(composite_mul.where(composite_mul.isnull(),1.0))
+    final_aua.loc[:,'pms_others_aua'] = srs
     return final_aua
     
