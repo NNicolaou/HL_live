@@ -133,7 +133,7 @@ def cash_interest(dic_data, input_dic, period='half_no'):
     overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     overnight_libor_revenue = aua['vantage_cash_aua']*(general.account_cash_dist['sipp'] * 0.2 + (1 - general.account_cash_dist['sipp']))*(overnight_libor/12)#.map(general.compound_growth_rate)
     gross_revenue = (annual_libor_revenue + overnight_libor_revenue)
-    net_revenue = gross_revenue - aua['vantage_cash_aua'] * general.account_cash_dist['sipp'] * (0.0005/12) # effective from Nov-2017
+    net_revenue = gross_revenue - aua['vantage_cash_aua'] * general.account_cash_dist['sipp'] * (0.0015/12) - aua['vantage_cash_aua'] * (1-general.account_cash_dist['sipp']) * (0.001/12)  # effective from Nov-2017
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
@@ -145,7 +145,7 @@ def cash_interest(dic_data, input_dic, period='half_no'):
 def cash_interest_margin(dic_data):
     annual = general.annual_libor_mean(dic_data)
     overnight = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
-    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * 0.0005)
+    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * 0.0015) - ((1-general.account_cash_dist['sipp']) * 0.001)
     return margin
 
 def paper_statement_revenue(dic_data, input_dic):
