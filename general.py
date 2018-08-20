@@ -31,7 +31,7 @@ fund_fx_cols = ['GBPGBP', 'GBPEUR', 'GBPUSD', 'GBPJPY', 'GBPCNY', 'GBPAUD','GBPN
 
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
-account_aua_dist = {'sipp':0.33, 'isa':0.4, 'f&s':0.27}
+account_aua_dist = {'sipp':0.335, 'isa':0.403, 'f&s':0.262}
 
 revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
 

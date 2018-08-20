@@ -22,8 +22,8 @@ no_of_shares = 474429699 # 474965441
 net_debt_cash = 125300000    
 discount_rate = 0.0825 # WACC - cost of equity
 #=============================================================================================================
-def disc_cash_flow(dic_data, input_dic, now=False, dcf_p=dcf_period, disc_rate = discount_rate):
-    dcf_end = dcf_start_year + dcf_p - 1
+def disc_cash_flow(dic_data, input_dic, now=False, fractional=False, dcf_p=dcf_period, disc_rate = discount_rate):
+    dcf_end = dcf_start_year + dcf_p# - 1
     if now is True:
         dcf_end = dcf_end -1
     if general.last_result_month == 6:
@@ -59,23 +59,45 @@ def disc_cash_flow(dic_data, input_dic, now=False, dcf_p=dcf_period, disc_rate =
         dcf.loc['EAT',:] = dcf.loc['EBIT',:] - dcf.loc['Tax',:]
         dcf.loc['Free cash flow',:] = dcf.loc['EAT',:] + dcf.loc['Depreciation',:] - dcf.loc['Capital Expenditure',:]
     
-    s1 = pandas.Series(1, index=dcf.columns).cumsum()
+    
+    s1 = pandas.Series(1, index=dcf.columns)
     s2 = pandas.Series(1+disc_rate, index=dcf.columns)
+    if fractional == True:
+        first_y = general.recent_end_year + 1
+        last_factor = (365.0 - (pandas.Timestamp(first_y,general.last_result_month + 1,1) - pandas.Timedelta(days=1) - pandas.Timestamp.today()).days) / 365
+        first_factor = ((pandas.Timestamp(first_y,general.last_result_month + 1,1) - pandas.Timedelta(days=1) - pandas.Timestamp.today()).days) / 365
+    #============== fractional discount factor, varies with time=========================
+        s1.iloc[0] = first_factor
+        s1.iloc[-1] = last_factor
+        dcf.loc['Free cash flow', dcf_start_year] = dcf.loc['Free cash flow', general.recent_end_year+1] * first_factor
+        dcf.loc['Free cash flow', dcf_end] = dcf.loc['Free cash flow', general.recent_end_year+1] * last_factor
+    #====================================================================================
+
+    s1 = s1.cumsum()
+
     
     discount_factors = s2 ** s1
     dcf.loc['Discounted cash flow',:] = dcf.loc['Free cash flow',:] / (s2 ** s1)
     
     return dcf
 
-def fair_value(dic_data, input_dic,now=False, dcf_p=dcf_period,disc_rate = discount_rate, pep_rate = perpetuity_growth_rate):
-    df = disc_cash_flow(dic_data, input_dic, now=now, dcf_p=dcf_p, disc_rate=disc_rate)
-    dcf_end = dcf_start_year + dcf_p - 1
+def fair_value(dic_data, input_dic,now=False, fractional=False,dcf_p=dcf_period,disc_rate = discount_rate, pep_rate = perpetuity_growth_rate):
+    df = disc_cash_flow(dic_data, input_dic, now=now,fractional=fractional,dcf_p=dcf_p, disc_rate=disc_rate)
+    dcf_end = dcf_start_year + dcf_p# - 1
     if now is True:
         dcf_end = dcf_end -1
     hl = pandas.DataFrame(index=['Terminal value','Enterprise value', 'Net debt&cash','Fair value','No. of shares','Fair value per share'], columns=['HL'])
-    terminal_value = (df.loc['Free cash flow',dcf_end]*(1+pep_rate)) / (disc_rate-pep_rate)
+    terminal_value = (df.loc['Free cash flow',dcf_end-1]*(1+pep_rate)) / (disc_rate-pep_rate)
     hl.loc['Terminal value',:] = terminal_value
-    enterprise_value = df.loc['Discounted cash flow',:].sum(min_count=1) + (terminal_value/((1+disc_rate)**dcf_period))
+    
+    if fractional==True:
+        first_y = general.recent_end_year + 1
+        first_factor = ((pandas.Timestamp(first_y,general.last_result_month + 1,1) - pandas.Timedelta(days=1) - pandas.Timestamp.today()).days) / 365
+        mod_dcf_period = dcf_period-1+first_factor
+    else:
+        mod_dcf_period = dcf_period
+        
+    enterprise_value = df.iloc[-1,:-1].sum(min_count=1) + (terminal_value/((1+disc_rate)**mod_dcf_period)) # adjusted for fraction fair value
     hl.loc['Enterprise value',:] = enterprise_value
     hl.loc['Net debt&cash',:] = net_debt_cash
     hl.loc['Fair value',:] = enterprise_value + net_debt_cash
