@@ -111,8 +111,8 @@ def summary_avg_aua_dist(data_dic, input_dic, period='financial_year'):
     result = pandas.concat([avg_aua_funds,avg_aua_shares,avg_aua_hlf_amc,avg_aua_cash,avg_aua_cash_service],axis='columns')
     return result.loc[temp:,:]
 
-def cash_margin(data_dic, period):
-    result = revenue.cash_interest_margin(data_dic)
+def cash_margin(data_dic, input_dic, period):
+    result = revenue.cash_interest_margin(data_dic, input_dic)
     result.name='Cash Margin'
     if general.last_result_month == 6:
         temp = general.recent_end_year + 1

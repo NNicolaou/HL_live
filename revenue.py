@@ -129,11 +129,14 @@ def pms_advice_fee(dic_data, input_dic, period='half_no'):
 
 def cash_interest(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
+    sipp_rebate = (input_dic['cash interest rebate'].fillna(method='ffill').reindex(index=general.month_end_series))['sipp_cash_interest_rebt']
+    others_rebate = (input_dic['cash interest rebate'].fillna(method='ffill').reindex(index=general.month_end_series))['others_cash_interest_rebt']
+    
     annual_libor_revenue = aua['vantage_cash_aua']*general.account_cash_dist['sipp']*0.8*(general.annual_libor_mean(dic_data)/12)#.map(general.compound_growth_rate)
     overnight_libor = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
     overnight_libor_revenue = aua['vantage_cash_aua']*(general.account_cash_dist['sipp'] * 0.2 + (1 - general.account_cash_dist['sipp']))*(overnight_libor/12)#.map(general.compound_growth_rate)
     gross_revenue = (annual_libor_revenue + overnight_libor_revenue)
-    net_revenue = gross_revenue - aua['vantage_cash_aua'] * general.account_cash_dist['sipp'] * (0.0015/12) - aua['vantage_cash_aua'] * (1-general.account_cash_dist['sipp']) * (0.001/12)  # effective from Nov-2017
+    net_revenue = gross_revenue - aua['vantage_cash_aua'] * general.account_cash_dist['sipp'] * (sipp_rebate/12) - aua['vantage_cash_aua'] * (1-general.account_cash_dist['sipp']) * (others_rebate/12) 
     if period=='month_no':
         result = net_revenue
     elif (period=='financial_year' or period=='calendar_year'):
@@ -142,10 +145,13 @@ def cash_interest(dic_data, input_dic, period='half_no'):
         result = net_revenue.groupby(['financial_year',period]).sum(min_count=1)
     return result
 
-def cash_interest_margin(dic_data):
+def cash_interest_margin(dic_data, input_dic):
     annual = general.annual_libor_mean(dic_data)
+    sipp_rebate = (input_dic['cash interest rebate'].fillna(method='ffill').reindex(index=general.month_end_series))['sipp_cash_interest_rebt']
+    others_rebate = (input_dic['cash interest rebate'].fillna(method='ffill').reindex(index=general.month_end_series))['others_cash_interest_rebt']
+    
     overnight = dic_data['Index price'].loc[:, 'Overnight LIBOR'].fillna(method='ffill').reindex(index=general.month_end_series).fillna(method='ffill')
-    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * 0.0015) - ((1-general.account_cash_dist['sipp']) * 0.001)
+    margin = general.account_cash_dist['sipp']*0.8*annual+(general.account_cash_dist['sipp']*0.2+(1-general.account_cash_dist['sipp']))*overnight - (general.account_cash_dist['sipp'] * sipp_rebate) - ((1-general.account_cash_dist['sipp']) * others_rebate)
     return margin
 
 def paper_statement_revenue(dic_data, input_dic):
