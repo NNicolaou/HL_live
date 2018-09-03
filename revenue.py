@@ -59,7 +59,8 @@ def hlf_daily_fund_size(dic_data, input_dic, period=None):
     count_map = temp.groupby('key').count()
     count_map.iloc[0,:] = 30              
     temp['count'] = temp['key'].map(count_map.to_dict()['nnb'])
-    temp['nnb'] = temp['nnb'] / temp['count']          
+    temp['nnb'] = temp['nnb'] / temp['count']     
+    
     portion = daily_fund_size.loc[pandas.to_datetime('today'),:] / daily_fund_size.loc[pandas.to_datetime('today'),:].sum(min_count=1)
     nnb = temp['nnb']         
     temp2 = pandas.DataFrame(columns=portion.index,index=nnb.index)
