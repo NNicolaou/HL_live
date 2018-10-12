@@ -47,6 +47,16 @@ def other_funds_fx_return(dic_data):
     
     return df
 
+def fx_effects_on_funds(dic_data):
+    df = pandas.DataFrame(columns=general.fund_distribution_cols, index=general.month_end_series)
+    df.iloc[0,:]=general.fund_distribution_values
+    df.sort_index(axis='columns',inplace=True)
+    df = df.fillna(method='ffill')
+    df2 = other_funds_fx_return(dic_data)
+    composite_returns = (df * df2).sum(axis='columns')
+    result = composite_returns.where(composite_returns.index <= pandas.to_datetime(general.last_day_prev_month))
+    return result
+    
 def other_funds_composite_return(dic_data):
     df = pandas.DataFrame(columns=general.fund_distribution_cols, index=general.month_end_series)
     df.iloc[0,:]=general.fund_distribution_values
