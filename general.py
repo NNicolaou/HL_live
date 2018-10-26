@@ -140,16 +140,20 @@ def monthly_fulfill(input_dic):
         result[keys] = fillna_monthly(input_dic[keys])
     return result
         
-def annual_libor_mean(dic_data):
-    libor = dic_data['Index price'].loc[:,'Annual LIBOR']
+def annual_libor_mean(dic_data, libor_type):
+    libor = dic_data['Index price'].loc[:,['Annual LIBOR', '1_month LIBOR', '3_month LIBOR']]
     # assuming libor stay the same in the future, if not then type in the rate that you expect in the index and hl price data
     raw_libor_mean_month = convert_fy_quarter_half_index(libor, libor.index).groupby(['calendar_year','month_no']).mean()
-    df = pandas.DataFrame(index=libor_month_end, columns=['Annual LIBOR'])
+    df = pandas.DataFrame(index=libor_month_end, columns=['Annual LIBOR', '1_month LIBOR', '3_month LIBOR'])
     temp_df = convert_fy_quarter_half_index(df, df.index).groupby(['calendar_year','month_no']).sum()
     libor_mean_month = raw_libor_mean_month.reindex(temp_df.index).fillna(method='ffill')
     libor_mean_month = libor_mean_month.reset_index().set_index(df.index).drop(['calendar_year','month_no'], axis='columns')
-    result = libor_mean_month.rolling(12).mean().reindex(month_end_series)
-    return result['Annual LIBOR']
+    
+    libor_mean_month.loc[:, 'Annual LIBOR'] =  libor_mean_month['Annual LIBOR'].rolling(12).mean()
+    libor_mean_month.loc[:, '3_month LIBOR'] =  libor_mean_month['3_month LIBOR'].rolling(3).mean()
+    
+    result = libor_mean_month.reindex(month_end_series)
+    return result[libor_type]
 
 
 def compound_growth_rate(rate, freq='Monthly', to_annual=False):
