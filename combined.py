@@ -271,7 +271,7 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
             return general.convert_fy_quarter_half_index(df, df.index).groupby(['financial_year',opt]).sum(min_count=1)
 
 def total_nnb_distribution_clientAlgo(dic_data, input_dic, opt=None):
-    total = total_nnb_clientAlgo(dic_data, input_dic, opt)
+    total = total_nnb_clientAlgo(dic_data, input_dic)
     result = (general.monthly_fulfill(input_dic)['nnb distribution']).reindex(index=general.month_end_series).multiply(total['NNB'], axis='index')
     result.iloc[0,:] = 0
     if opt is None:
@@ -311,7 +311,9 @@ def total_aua(dic_data, input_dic):
         
         test[(test.index>'2018-12-31')] = y2 
         test[(test.index<='2018-12-31')] = 0
-        
+        test[(test.index>'2019-06-28')] = 160000000
+        test[(test.index>'2020-06-30')] = 320000000
+        test[(test.index>'2021-06-30')] = 480000000
         return test.cumsum()
     
     cash_temp = cash_aua_temp(final_aua)
