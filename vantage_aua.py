@@ -16,9 +16,6 @@ def hl_shares_aua(dic_data, df=aua_frame):
     return aua_frame['vantage_hl_shares_aua'].fillna(method='ffill').multiply((hl_return+1).cumprod())
     
     
-
-
-
 def other_shares_aua(dic_data, df=aua_frame):
     ftse_all_shares = dic_data['Index price'].loc[:,['FTSE All Share','FTSE All Share TR']].reindex(index=general.month_end_series)
     returns = (ftse_all_shares / ftse_all_shares.shift(1).fillna(method='bfill') - 1).mean(axis='columns')
@@ -55,7 +52,7 @@ def fx_effects_on_funds(dic_data):
     df2 = other_funds_fx_return(dic_data)
     composite_returns = (df * df2).sum(axis='columns')
     result = composite_returns.where(composite_returns.index <= pandas.to_datetime(general.last_day_prev_month))
-    return result
+    return composite_returns
     
 def other_funds_composite_return(dic_data):
     df = pandas.DataFrame(columns=general.fund_distribution_cols, index=general.month_end_series)
