@@ -1,12 +1,12 @@
 import pandas
 import numpy
-import datetime
-idx = pandas.IndexSlice
 import general
 import discretionary_aua
 import vantage_aua
 
-def historic_aua(dic_data, input_dic):
+idx = pandas.IndexSlice
+
+def historic_aua(dic_data):
     dis = discretionary_aua.compute_historic_aua(dic_data)
     van = vantage_aua.compute_historic_aua(dic_data)
     aua = pandas.concat([dis,van], axis='columns')
@@ -38,7 +38,7 @@ def future_nnb_distribution(dic_data, input_dic):
     return result
 
 def total_historic_aua(dic_data, input_dic):
-    aua = historic_aua(dic_data, input_dic)
+    aua = historic_aua(dic_data)
     #nnb = historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')
     nnb = compounded_historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')   # new nnb algo
     
@@ -294,7 +294,7 @@ def total_aua(dic_data, input_dic):
     # ======== new net new client algo ===============
     future = future_aua(dic_data, input_dic)
     future.loc[general.last_day_prev_month,:] = 0.0
-    past = historic_aua(dic_data, input_dic)
+    past = historic_aua(dic_data)
     final_aua = future.fillna(0.0) + past.fillna(0.0) + total_nnb_distribution_clientAlgo(dic_data, input_dic).cumsum()
     
     final_aua.loc[:,'hlf_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua']

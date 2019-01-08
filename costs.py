@@ -1,13 +1,4 @@
-import pandas
-import numpy
-import datetime
-idx = pandas.IndexSlice
 import general
-import discretionary_aua
-import vantage_aua
-import combined
-import revenue
-import data_accessing
 
 aua_frame = general.report_dic['costs'].loc[:,general.growth_costs_cols]
 #general.set_values(col_names=general.growth_costs_cols,values=general.costs_known_values,date = general.prev_financial_year_end,df=aua_frame)

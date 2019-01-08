@@ -5,7 +5,7 @@ import data_accessing
 idx = pandas.IndexSlice
 ##############################################################################################################
 '''
-Inputs
+Parameters
 '''
 recent_end_year = 2018    # Calendar year
 last_result_month = 6

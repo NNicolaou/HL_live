@@ -1,15 +1,11 @@
 import pandas
-import numpy
-import datetime
-idx = pandas.IndexSlice
 import general
-import discretionary_aua
-import vantage_aua
-import combined
 import revenue
 import costs
 import consolidated
 import data_accessing
+
+idx = pandas.IndexSlice
 
 if general.last_result_month == 6:
     dcf_start_year = general.recent_end_year+1
