@@ -1,24 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="90daa51e-2c79-4fea-afb3-94a614b9c89a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/HL_live.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/HL_live.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/front_end-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.ipynb_checkpoints/front_end-checkpoint.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/HL funds data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/HL funds data.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/combined.py" beforeDir="false" afterPath="$PROJECT_DIR$/combined.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/consolidated.py" beforeDir="false" afterPath="$PROJECT_DIR$/consolidated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/costs.py" beforeDir="false" afterPath="$PROJECT_DIR$/costs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_accessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_accessing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/discf.py" beforeDir="false" afterPath="$PROJECT_DIR$/discf.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/discretionary_aua.py" beforeDir="false" afterPath="$PROJECT_DIR$/discretionary_aua.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/front_end.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/front_end.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/general.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/revenue.py" beforeDir="false" afterPath="$PROJECT_DIR$/revenue.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vantage_aua.py" beforeDir="false" afterPath="$PROJECT_DIR$/vantage_aua.py" afterDir="false" />
-    </list>
+    <list default="true" id="90daa51e-2c79-4fea-afb3-94a614b9c89a" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -64,6 +47,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -75,11 +59,10 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/venv" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MorningStar Scraping" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
