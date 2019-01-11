@@ -1,14 +1,11 @@
 import pandas
-import numpy
-import datetime
-idx = pandas.IndexSlice
 import general
-import discretionary_aua
-import vantage_aua
 import combined
 import revenue
 import costs
 import data_accessing
+
+idx = pandas.IndexSlice
 
 revenue_cols = ['Platform fees','Net renewal income','Management fees','HL Fund AMC','Stockbroking income','Interest receivable','Adviser charges','Funds Library','Cash Service','Other income']
 costs_cols = ['Staff costs', 'Marketing and distribution spend','Depreciation, amortisation & financial costs','Office running costs','Other costs','FSCS levy costs']

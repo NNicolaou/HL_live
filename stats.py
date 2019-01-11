@@ -1,16 +1,14 @@
 import pandas
-import numpy
 import datetime
-idx = pandas.IndexSlice
 import general
-import discretionary_aua
-import vantage_aua
 import combined
 import revenue
 import costs
-import data_accessing
 import discf
 import consolidated
+
+idx = pandas.IndexSlice
+
 '''
 FY annual statistics
 '''

@@ -3,10 +3,7 @@ import numpy
 import datetime
 idx = pandas.IndexSlice
 import general
-import discretionary_aua
-import vantage_aua
 import combined
-import data_accessing
 
 aua_frame = general.report_dic['revenue'].loc[:,general.revenue_known_cols]
 #general.set_values(col_names=general.revenue_known_cols,values=general.revenue_known_values,date = general.prev_financial_year_end,df=aua_frame)
