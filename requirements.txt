@@ -1,0 +1,8 @@
+--only-binary :all
+
+jupyter==1.0.0
+matplotlib==3.0.2
+pandas==0.22.0
+xlrd==1.2.0
+SQLAlchemy==1.2.16
+psycopg==2.7.6.1
