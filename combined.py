@@ -18,15 +18,16 @@ def historic_nnb_distribution(dic_data, input_dic):
     result.iloc[0,:] = 0
     return result
 
-def compounded_historic_nnb_distribution(dic_data, input_dic):
-    df = historic_nnb_distribution(dic_data, input_dic)
+def compounded_historic_nnb_distribution_effect(dic_data, input_dic):
+    df = total_nnb_distribution_clientAlgo(dic_data, input_dic)
+    df[df.index > pandas.to_datetime(general.last_day_prev_month)] = 0
     disc_comp = discretionary_aua.get_composite_return(dic_data)
-    df.loc[:,general.disc_known_cols] = df.loc[:,general.disc_known_cols].multiply((1+disc_comp),axis='index')
+    df.loc[:,general.disc_known_cols] = df.loc[:,general.disc_known_cols].multiply(disc_comp,axis='index')
     ftse_all_shares = dic_data['Index price'].loc[:,['FTSE All Share','FTSE All Share TR']].reindex(index=general.month_end_series)
     returns = (ftse_all_shares / ftse_all_shares.shift(1).fillna(method='bfill') - 1).mean(axis='columns')
-    df.loc[:,'vantage_other_shares_aua'] = df.loc[:,'vantage_other_shares_aua'] * (1+returns)
+    df.loc[:,'vantage_other_shares_aua'] = df.loc[:,'vantage_other_shares_aua'] * returns
     vantage_comp = vantage_aua.other_funds_composite_return(dic_data)
-    df.loc[:,'vantage_other_funds_aua'] = df.loc[:,'vantage_other_funds_aua'] * (1+vantage_comp)
+    df.loc[:,'vantage_other_funds_aua'] = df.loc[:,'vantage_other_funds_aua'] * vantage_comp
     return df
 
     
@@ -40,9 +41,9 @@ def future_nnb_distribution(dic_data, input_dic):
 def total_historic_aua(dic_data, input_dic):
     aua = historic_aua(dic_data)
     #nnb = historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')
-    nnb = compounded_historic_nnb_distribution(dic_data, input_dic).cumsum(axis='index')   # new nnb algo
+    nnb_effect = compounded_historic_nnb_distribution_effect(dic_data, input_dic).cumsum(axis='index')   # new nnb algo
     
-    result = aua + nnb.loc[:,aua.columns]
+    result = aua + nnb_effect.loc[:,aua.columns]
     return result
 
 
