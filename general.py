@@ -1,7 +1,8 @@
 import pandas
 import numpy
 import datetime
-import data_accessing
+from data_access.data_accessing import report_data
+
 idx = pandas.IndexSlice
 ##############################################################################################################
 '''
@@ -199,7 +200,7 @@ def convert_report_data(dic):
         dic[sheets].index.name='month_end'
     return dic2
 
-report_dic = convert_report_data(data_accessing.report_data)
+report_dic = convert_report_data(report_data)
 
 
     

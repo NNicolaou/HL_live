@@ -15,6 +15,8 @@ def append_share_class_units(dic_data):#,idx=general.temp_month_end):
         dic_data[x] = dic_data[y].divide(dic_data[z]/100)
         dic_data[x].where(dic_data[y]!=0,0,inplace=True)
 
+def append_fund_size(dic_data):
+    dic_data['fund size'] = dic_data['acc size'] + dic_data['inc size']
  
 def get_composite_return(dic_data):
     '''

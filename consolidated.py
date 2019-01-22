@@ -3,7 +3,7 @@ import general
 import combined
 import revenue
 import costs
-import data_accessing
+from data_access import data_accessing
 
 idx = pandas.IndexSlice
 
