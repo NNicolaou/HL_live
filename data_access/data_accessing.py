@@ -1,6 +1,5 @@
-from pandas import read_excel
+from pandas import read_excel, to_datetime
 from data_access.query import DatabaseQuery, db_config
-from discretionary_aua import append_fund_size, append_share_class_units
 
 data_service = DatabaseQuery(**db_config)
 
@@ -20,7 +19,8 @@ index_hl_data_sheet = ['Index price', 'HL price', 'fx_rates']
 
 data_dic_keys_to_table_db = {'acc price': 'hlf_acc_price', 'inc price': 'hlf_inc_price', 'acc size': 'hlf_acc_size',
                              'inc size': 'hlf_inc_size', 'Index price': 'index_price', 'HL price': 'hl_price',
-                             'fx_rates': 'currency_price'}
+                             'fx_rates': 'currency_price', 'total nnb': 'hl_nnb', 'clients': 'hl_nnc',
+                             'revenue': 'hl_revenue', 'costs': 'hl_cost', 'aua': 'hl_aua'}
 
 def read_data(data_name, sheets):
     '''
@@ -33,24 +33,38 @@ def read_data(data_name, sheets):
         for items in sheets:
             dic[items] = read_excel(data_name, items)
             dic[items].sort_index(axis='columns',inplace=True)
-        return dic
+        return dic.copy()
 
-def pull_data_from_db(from_dt, data_types=list(data_dic_keys_to_table_db.keys())):
+def append_fund_size(dic_data):
+    dic_data['fund size'] = dic_data['acc size'] + dic_data['inc size']
+
+def append_share_class_units(dic_data):#,idx=general.temp_month_end):
+    '''
+    dic_data as a result of read_funds_data from data_accessing library
+    '''
+    for x, y, z in zip(['acc unit','inc unit'],['acc size', 'inc size'],['acc price','inc price']):
+        #dic_data[x] = dic_data[y].reindex(index=idx).divide(dic_data[z].reindex(index=idx) /100)
+        dic_data[x] = dic_data[y].divide(dic_data[z]/100)
+        dic_data[x].where(dic_data[y]!=0,0,inplace=True)
+
+def pull_data_from_db(from_dt=None, data_types=list(data_dic_keys_to_table_db.keys())):
     result_dic = {}
     for data_type in data_types:
         result_dic[data_type] = data_service.select_time_series_table(data_dic_keys_to_table_db[data_type],
                                                                       from_dt=from_dt)
-    return result_dic
+        result_dic[data_type]['Date'] = to_datetime(result_dic[data_type]['Date'])
+        result_dic[data_type] = result_dic[data_type].sort_values(by='Date')
+        result_dic[data_type] = result_dic[data_type].set_index('Date')
+        result_dic[data_type].index.name = ''
+    return result_dic.copy()
 
 report_data = pull_data_from_db(from_dt=None, data_types=report_data_sheet)
 
-def pull_data_for_model(from_dt):
-    price_dic = pull_data_from_db(from_dt)
-    nnb_dic = read_data(nnb_data_name, nnb_data_sheet)
-    append_fund_size(price_dic)
-    append_share_class_units(price_dic)
-    data_dic = {**price_dic, **nnb_dic}
-    return data_dic
+def pull_data_for_model(from_dt=None):
+    data_dic = pull_data_from_db(from_dt=from_dt)
+    append_fund_size(data_dic)
+    append_share_class_units(data_dic)
+    return data_dic.copy()
 
 
 

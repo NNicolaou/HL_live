@@ -16,7 +16,6 @@ discretionary_aua_headers = ['pms_aua', 'pms_hlf_aua','pms_others_aua','vantage_
 vantage_aua_headers =  ['vantage_hl_shares_aua','vantage_other_shares_aua','vantage_shares_aua','vantage_other_funds_aua','vantage_aua','vantage_cash_aua']
 
 account_aua_headers = ['sipp_aua','isa_aua','fs_aua','sipp_cash_aua','sipp_funds_aua','sipp_shares_aua','isa_cash_aua','isa_funds_aua','isa_shares_aua','fs_cash_aua','fs_funds_aua','fs_shares_aua']
-new_deposit_service_headers = ['deposit_cash_aua']
 
 disc_known_cols = ['pms_hlf_aua','pms_others_aua','vantage_hlf_aua','thirdparty_hlf_aua']
 hlf_known_cols = ['pms_hlf_aua','vantage_hlf_aua','thirdparty_hlf_aua']
@@ -35,6 +34,7 @@ fund_fx_cols = ['GBPGBP', 'GBPEUR', 'GBPUSD', 'GBPJPY', 'GBPCNY', 'GBPAUD','GBPN
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 account_cash_dist = {'sipp':0.53125, 'isa':0.25, 'f&s':0.21875}
 account_aua_dist = {'sipp':0.30, 'isa':0.41, 'f&s':0.29}
+account_dist = {'sipp': 0.273, 'isa': 0.506, 'f&s': 0.221}
 
 revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
 
