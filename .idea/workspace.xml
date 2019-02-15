@@ -3,11 +3,16 @@
   <component name="ChangeListManager">
     <list default="true" id="90daa51e-2c79-4fea-afb3-94a614b9c89a" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
       <change beforePath="$PROJECT_DIR$/NNB data.xlsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/data_access/data_accessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_access/data_accessing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/discretionary_aua.py" beforeDir="false" afterPath="$PROJECT_DIR$/discretionary_aua.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/front_end.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/front_end.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/general.py" beforeDir="false" afterPath="$PROJECT_DIR$/general.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/control panel.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/control panel.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/front_end.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/front_end.ipynb" afterDir="false" />
+>>>>>>> master
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,6 +25,7 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/general.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< HEAD
             <state relative-caret-position="281">
               <caret line="84" column="4" lean-forward="true" selection-start-line="84" selection-start-column="4" selection-end-line="84" selection-end-column="4" />
               <folding>
@@ -37,6 +43,13 @@
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
+=======
+            <state relative-caret-position="140">
+              <caret line="7" column="10" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="10" />
+              <folding>
+                <element signature="e#0#13#0" expanded="true" />
+              </folding>
+>>>>>>> master
             </state>
           </provider>
         </entry>
@@ -54,16 +67,24 @@
       <find>future_aua</find>
       <find>total_historic_aua</find>
       <find>compounded_historic_nnb_distribution</find>
+<<<<<<< HEAD
       <find>new_deposit_service_headers</find>
       <find>compute</find>
       <find>nnb_data_name</find>
+=======
+      <find>compute</find>
+>>>>>>> master
     </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
+<<<<<<< HEAD
         <entry key="$PROJECT_DIR$" value="master" />
+=======
+        <entry key="$PROJECT_DIR$" value="data_from_db" />
+>>>>>>> master
       </map>
     </option>
   </component>
@@ -87,8 +108,13 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
+<<<<<<< HEAD
     <option name="x" value="2307" />
     <option name="y" value="4" />
+=======
+    <option name="x" value="2157" />
+    <option name="y" value="224" />
+>>>>>>> master
     <option name="width" value="1400" />
     <option name="height" value="1000" />
   </component>
@@ -335,6 +361,7 @@
     <entry file="file://$PROJECT_DIR$/data_access/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
+<<<<<<< HEAD
     <entry file="file://$PROJECT_DIR$/discretionary_aua.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -346,6 +373,9 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/data_access/query.py">
+=======
+    <entry file="file://$PROJECT_DIR$/combined.py">
+>>>>>>> master
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="351">
           <caret line="163" lean-forward="true" selection-start-line="163" selection-end-line="163" />
@@ -369,6 +399,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="281">
           <caret line="84" column="4" lean-forward="true" selection-start-line="84" selection-start-column="4" selection-end-line="84" selection-end-column="4" />
+          <folding>
+            <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/general.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="7" column="10" selection-start-line="7" selection-start-column="10" selection-end-line="7" selection-end-column="10" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
           </folding>

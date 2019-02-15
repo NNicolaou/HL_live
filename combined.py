@@ -50,9 +50,10 @@ def total_historic_aua(dic_data, input_dic):
 def future_aua(dic_data, input_dic):
     aua = total_historic_aua(dic_data, input_dic)
     compound_rate = general.fillna_monthly(input_dic['compound growth']).reindex(index=general.month_end_series).applymap(general.compound_growth_rate)
+    compound_rate[compound_rate.index <= pandas.to_datetime(general.last_day_prev_month)] = 0
     sliced_compound_rate = compound_rate.loc[general.last_day_prev_month:,:]
     sliced_aua = aua.loc[general.last_day_prev_month:,:].fillna(method='ffill')
-    working_compound = (1+sliced_compound_rate).pow((sliced_compound_rate.count(axis='columns').cumsum()-1),axis='index')
+    working_compound = (sliced_compound_rate+1).cumprod()
     sliced_aua = sliced_aua.multiply(working_compound['compound growth rate'], axis='index')
     return sliced_aua.reindex(general.month_end_series)
 
@@ -298,21 +299,20 @@ def total_aua(dic_data, input_dic):
     past = historic_aua(dic_data)
     final_aua = future.fillna(0.0) + past.fillna(0.0) + total_nnb_distribution_clientAlgo(dic_data, input_dic).cumsum()
     
-    final_aua.loc[:,'hlf_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua']
+    final_aua.loc[:,'hlf_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua'] + final_aua.loc[:,'pms_hlf_aua']
     final_aua.loc[:,'pms_aua'] = final_aua.loc[:,'pms_others_aua'] + final_aua.loc[:,'pms_hlf_aua']
-    final_aua.loc[:,'discretionary_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_aua']
+    final_aua.loc[:,'discretionary_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'thirdparty_hlf_aua'] + final_aua.loc[:,'pms_aua']
     final_aua.loc[:,'vantage_shares_aua'] = final_aua.loc[:,'vantage_hl_shares_aua'] + final_aua.loc[:,'vantage_other_shares_aua']
-    final_aua.loc[:,'vantage_aua'] = final_aua.loc[:,'vantage_shares_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'vantage_cash_aua']
-    final_aua.loc[:,'total_hlf_aua'] = final_aua.loc[:,'hlf_aua'] + final_aua.loc[:,'pms_hlf_aua']
-    final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'discretionary_aua'] + final_aua.loc[:,'vantage_other_funds_aua']
+    final_aua.loc[:,'vantage_aua'] = final_aua.loc[:,'vantage_shares_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'vantage_cash_aua']
+    final_aua.loc[:,'total_hlf_aua'] = final_aua.loc[:,'hlf_aua']
+    final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'pms_hlf_aua']
     
     
     def cash_aua_temp(df, y2=80000000):
         test = df['cash_service_aua'].copy()
         
-        test[(test.index<='2018-09-28')] = 26000000
         test[(test.index>'2018-12-31')] = y2 
-        test[(test.index<='2018-12-31') & (test.index>'2018-09-28')] = 133000000
+        
         test[(test.index>'2019-06-28')] = 160000000
         test[(test.index>'2020-06-30')] = 320000000
         test[(test.index>'2021-06-30')] = 480000000
@@ -320,11 +320,7 @@ def total_aua(dic_data, input_dic):
     
     cash_temp = cash_aua_temp(final_aua)
     
-    final_aua.loc[:,'cash_service_aua'] = final_aua.loc[:,'cash_service_aua'] + cash_temp
-    
-    
-    
-    
+    final_aua.loc[:,'cash_service_aua'] = cash_temp
     
     
     final_aua.loc[:,'total_assets_aua'] = final_aua.loc[:,'vantage_aua'] + final_aua.loc[:,'pms_aua'] + final_aua.loc[:,'cash_service_aua']
@@ -332,7 +328,7 @@ def total_aua(dic_data, input_dic):
     final_aua.loc[:,'Funds'] = final_aua.loc[:,'total_funds_aua']
     final_aua.loc[:,'Shares'] = final_aua.loc[:,'vantage_shares_aua']
     final_aua.loc[:,'HLF'] = final_aua.loc[:,'total_hlf_aua']
-    final_aua.loc[:,'Cash'] = final_aua.loc[:,'vantage_cash_aua']
+    final_aua.loc[:,'Cash'] = final_aua.loc[:,'vantage_cash_aua'] + final_aua.loc[:,'pms_others_aua']
     final_aua.loc[:, 'SIPP'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['sipp']
     final_aua.loc[:, 'ISA'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['isa']
     final_aua.loc[:, 'F&S'] = final_aua.loc[:, 'vantage_aua'] * general.account_aua_dist['f&s']
