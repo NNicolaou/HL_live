@@ -50,9 +50,10 @@ def total_historic_aua(dic_data, input_dic):
 def future_aua(dic_data, input_dic):
     aua = total_historic_aua(dic_data, input_dic)
     compound_rate = general.fillna_monthly(input_dic['compound growth']).reindex(index=general.month_end_series).applymap(general.compound_growth_rate)
+    compound_rate[compound_rate.index <= pandas.to_datetime(general.last_day_prev_month)] = 0
     sliced_compound_rate = compound_rate.loc[general.last_day_prev_month:,:]
     sliced_aua = aua.loc[general.last_day_prev_month:,:].fillna(method='ffill')
-    working_compound = (1+sliced_compound_rate).pow((sliced_compound_rate.count(axis='columns').cumsum()-1),axis='index')
+    working_compound = (sliced_compound_rate+1).cumprod()
     sliced_aua = sliced_aua.multiply(working_compound['compound growth rate'], axis='index')
     return sliced_aua.reindex(general.month_end_series)
 
