@@ -3,7 +3,7 @@ import general
 import revenue
 import costs
 import consolidated
-import data_accessing
+from data_access import data_accessing
 
 idx = pandas.IndexSlice
 
@@ -109,7 +109,7 @@ def report_reformat(typ, year=dcf_start_year-1,cal_year=False):
     '''
     typ is either "revenue" or "costs"
     '''
-    df = general.convert_fy_quarter_half_index(data_accessing.report_data[typ],data_accessing.report_data[typ].index)
+    df = general.convert_fy_quarter_half_index(data_accessing.report_data[typ], data_accessing.report_data[typ].index)
     if cal_year is False:
         return df.groupby('financial_year').sum(min_count=1).loc[year,:]
     else:
