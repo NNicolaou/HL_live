@@ -33,14 +33,18 @@ fund_fx_cols = ['GBPGBP', 'GBPEUR', 'GBPUSD', 'GBPJPY', 'GBPCNY', 'GBPAUD','GBPN
 
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 
-account_cash_dist = {'sipp':0.51, 'isa':0.27, 'f&s':0.22}
-account_aua_dist = {'sipp':0.34, 'isa':0.40, 'f&s':0.26}
+account_cash_dist = {'sipp': 0.5188, 'isa': 0.3147, 'f&s': 0.1665}
+account_aua_dist = {'sipp': 0.34, 'isa': 0.40, 'f&s': 0.26}
+account_dist = {'sipp': 0.2728, 'isa': 0.5057, 'f&s': 0.2215}
+
+management_fee_cap_per_year = {'sipp': 200, 'isa': 50}
+management_fee_as_percent_max_fee = 0.2025
 
 
 revenue_known_cols = ['renewal_income','management_fee','stockbroking_commission','stockbroking_income','interest_on_cash','hlf_amc','platform_fee','pms_advice', 'advice_fee','funds_library','paper_income','other_income','currency_revenue','interest_on_reserve','cash_service']
 
 
-growth_revenue_cols = ['advice_fee','currency_revenue','funds_library','interest_on_reserve','management_fee','other_income','renewal_income','stockbroking_commission','stockbroking_income']
+growth_revenue_cols = ['advice_fee','currency_revenue','funds_library','interest_on_reserve','other_income','renewal_income','stockbroking_commission','stockbroking_income']
 
 growth_costs_cols = ['staff_costs','marketing_distribution','depre_amort_financial','office_running','FSCS_levy','others', 'capital_expenditure']
 
