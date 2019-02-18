@@ -109,10 +109,21 @@ def hlf_amc_daily(dic_data, input_dic, period='half_no'):
     final_result.index = final_result.index.droplevel(2)
     
     return final_result
-    
-                  
-                  
-                  
+
+def management_fee(data_dic, input_dic):
+    predicted_accounts_dist = combined.accounts_dist_predt(data_dic, input_dic)
+    max_management_fee = (predicted_accounts_dist['sipp'].shift(1) * (general.management_fee_cap_per_year['sipp'] / 2)) + \
+                         (predicted_accounts_dist['isa'].shift(1) * (general.management_fee_cap_per_year['isa'] / 2))
+    management_fee = max_management_fee * general.management_fee_as_percent_max_fee
+    management_fee.name = 'management_fee'
+    half_no_series = pandas.Series(management_fee.index.get_level_values('quarter_no')).replace({2: 1, 4: 2})
+    half_no_series.name = 'half_no'
+    management_fee = management_fee.reset_index()
+    management_fee = management_fee.drop('quarter_no', axis='columns')
+    management_fee['half_no'] = half_no_series
+    management_fee = management_fee.set_index(['financial_year', 'half_no'])['management_fee']
+    return management_fee
+
 def pms_advice_fee(dic_data, input_dic, period='half_no'):
     aua = combined.total_aua(dic_data, input_dic)
     aua_margins = general.fillna_monthly(input_dic['aua margin']).reindex(index=general.month_end_series)
@@ -205,6 +216,11 @@ def semi_revenue(dic_data, input_dic):
     series = platform_fee(dic_data, input_dic)
     series[0] = 0
     df.loc[:,'platform_fee'] = df.loc[:,'platform_fee'].fillna(0) + series.values
+
+    management_fees = management_fee(dic_data, input_dic)
+    management_fees = management_fees.reindex(index=series.index)
+    management_fees[0] = 0
+    df.loc[:, 'management_fee'] = df.loc[:, 'management_fee'].fillna(0) + management_fees.values
     
     series = pms_advice_fee(dic_data, input_dic)
     series[0] = 0
