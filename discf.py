@@ -14,7 +14,7 @@ else:
 #===============================================Inputs=========================================================
 dcf_period = 9
 perpetuity_growth_rate = 0.0375  # Gordon growth rate - long term growth rate
-no_of_shares = 474318625 
+no_of_shares = 475789804
 net_debt_cash = 77345181 #126200000    
 discount_rate = 0.0825 # WACC - cost of equity
 #=============================================================================================================
