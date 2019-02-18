@@ -341,7 +341,30 @@ def total_aua(dic_data, input_dic):
     
     return result
     
-    
+def accounts_dist_predt(data_dic, input_dic):
+    account_data = data_dic['no_of_accounts']
+    total_predicted_clients = total_client_predt(data_dic, input_dic).to_frame()
+    semi_annual_total_clients = total_predicted_clients.loc[idx[:, [2, 4]], :]
+    total_client_change = semi_annual_total_clients / semi_annual_total_clients.shift(1) - 1
+    reindexed_account_data = general.convert_fy_quarter_half_index(account_data, account_data.index).reset_index()
+    current_account_dist = reindexed_account_data.drop(['half_no', 'calendar_year', 'month_no', 'month_end'], axis='columns').set_index(['financial_year', 'quarter_no'])
+    current_account_dist.columns = ['sipp', 'isa', 'f&s']
+    current_total_accounts_df = current_account_dist.sum(axis='columns').to_frame()
+    current_total_accounts_df.columns = ['total_clients']
+    current_total_accounts_df = current_total_accounts_df.where(current_total_accounts_df != 0)
+    temp_total_accounts_df = current_total_accounts_df.fillna(method='ffill').where(current_total_accounts_df.isna())
+    temp_total_accounts_df = temp_total_accounts_df.reindex(total_client_change.index).fillna(method='ffill')
+    multipliers = (total_client_change.where(temp_total_accounts_df['total_clients'].notna()) + 1).cumprod()
+    total_predicted_accounts = temp_total_accounts_df['total_clients'] * multipliers['No. of clients']
+
+    account_dist_df = pandas.DataFrame(index=total_predicted_accounts.index, columns=['sipp', 'isa', 'f&s'])
+    for account_type in general.account_dist:
+        account_dist_df[account_type] = general.account_dist[account_type] * total_predicted_accounts
+    from numpy import nan
+    final_account_dist_df = (account_dist_df.fillna(0) + current_account_dist.reindex(index=account_dist_df.index).fillna(0)).replace(0, nan)
+    return final_account_dist_df
+
+
 
     
     

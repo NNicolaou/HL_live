@@ -3,24 +3,17 @@ from data_access.query import DatabaseQuery, db_config
 
 data_service = DatabaseQuery(**db_config)
 
-nnb_data_name = 'NNB data.xlsx'
-nnb_data_sheet = ['total nnb','clients']
 assumptions_name = 'control panel.xlsx'
 assumptions_sheet = ['nnb distribution', 'nnb pcent total asset', 'compound growth', 'aua margin', 'growth rate',
                      'tax rate', 'nnc pcent total client', 'cash interest rebate']
 
-
-# report_data_name = 'financial report data.xlsx'
 report_data_sheet = ['revenue','costs','aua']
-# fund_data_name = 'HL funds data.xlsx'
-fund_data_types = ['acc price','inc price','acc size','inc size','fund size','account number','trades']
-# index_hl_data_name = 'index and hl price data.xlsx'
 index_hl_data_sheet = ['Index price', 'HL price', 'fx_rates']
 
 data_dic_keys_to_table_db = {'acc price': 'hlf_acc_price', 'inc price': 'hlf_inc_price', 'acc size': 'hlf_acc_size',
                              'inc size': 'hlf_inc_size', 'Index price': 'index_price', 'HL price': 'hl_price',
                              'fx_rates': 'currency_price', 'total nnb': 'hl_nnb', 'clients': 'hl_nnc',
-                             'revenue': 'hl_revenue', 'costs': 'hl_cost', 'aua': 'hl_aua'}
+                             'revenue': 'hl_revenue', 'costs': 'hl_cost', 'aua': 'hl_aua', 'no_of_accounts': 'hl_accounts'}
 
 def read_data(data_name, sheets):
     '''
