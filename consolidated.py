@@ -7,7 +7,7 @@ from data_access import data_accessing
 
 idx = pandas.IndexSlice
 
-revenue_cols = ['Platform fees','Net renewal income','Management fees','HL Fund AMC','Stockbroking income','Interest receivable','Adviser charges','Funds Library','Cash Service','Other income']
+revenue_cols = ['Platform fees','Net renewal income','Management fees','HL Fund AMC','Stockbroking income','Interest receivable','Adviser charges','Funds Library','Cash Service','Other income','On-going adviser charges']
 costs_cols = ['Staff costs', 'Marketing and distribution spend','Depreciation, amortisation & financial costs','Office running costs','Other costs','FSCS levy costs']
 aua_cols = ['Vantage AUA','PMS AUA','HLMM Funds AUA','Cash Service AUA']
 nnb_cols = ['Vantage nnb','PMS nnb','HLMM Funds nnb','Cash Service nnb']
@@ -22,14 +22,15 @@ def revenue_analysis(dic_data, input_dic):
     df.loc[:,'Cash Service'] = _revenue['cash_service']
     df.loc[:,'Platform fees'] = _revenue['platform_fee']
     df.loc[:,'Net renewal income'] = _revenue['renewal_income']
-    df.loc[:,'Management fees'] = _revenue['management_fee'] + _revenue['pms_advice']
+    df.loc[:,'Management fees'] = _revenue['management_fee']
+    df.loc[:,'On-going adviser charges'] = _revenue['pms_advice']
     df.loc[:,'HL Fund AMC'] = _revenue['hlf_amc']
     df.loc[:,'Stockbroking income'] = _revenue['stockbroking_commission'] + _revenue['stockbroking_income']
     df.loc[:,'Interest receivable'] = _revenue['interest_on_cash']
     df.loc[:,'Adviser charges'] = _revenue['advice_fee']
     df.loc[:,'Funds Library'] = _revenue['funds_library']
     df.loc[:,'Other income'] = _revenue['paper_income'] + _revenue['other_income']
-    df.loc[:,'Total revenue'] = df.sum(axis='columns')
+    df.loc[:,'Total net revenue'] = df.sum(axis='columns')
     
     return df
 
@@ -80,7 +81,7 @@ def get_revenue_compare(dic_data, input_dic, half, year=general.recent_end_year)
         df = annual_revenue_analysis(dic_data, input_dic)
         df = df.loc[year,:].transpose()
         
-    dic = {'WP forecast':df, 'Actual': actual_df}
+    dic = {'Horatio forecast':df, 'Actual': actual_df}
     result = pandas.concat(dic, axis='columns')
     return result
 
@@ -97,7 +98,7 @@ def get_costs_compare(input_dic, half, year=general.recent_end_year):
     else:
         df = annual_costs_analysis(input_dic)
         df = df.loc[year,:].transpose()
-    dic = {'WP forecast':df.abs(), 'Actual': actual_df.abs()}
+    dic = {'Horatio forecast':df.abs(), 'Actual': actual_df.abs()}
     result = pandas.concat(dic, axis='columns')
 
     return result
@@ -143,7 +144,7 @@ def get_aua_compare(dic_data, input_dic, year=general.recent_end_year):
         year = [year]
         
     df = aua_analysis(dic_data, input_dic).groupby(['financial_year','half_no']).sum(min_count=1)
-    dic = {'WP forecast':df.loc[idx[year,:],:], 'Actual': actual_df}
+    dic = {'Horatio forecast':df.loc[idx[year,:],:], 'Actual': actual_df}
     result = pandas.concat(dic, axis='columns')
 
     return result
@@ -155,14 +156,15 @@ def convert_report_revenue_data(half,year=general.recent_end_year,cal_year=False
     df.loc[:,'Cash Service'] = _revenue['cash_service']
     df.loc[:,'Platform fees'] = _revenue['platform_fee']
     df.loc[:,'Net renewal income'] = _revenue['renewal_income']
-    df.loc[:,'Management fees'] = _revenue['management_fee'] + _revenue['pms_advice']
+    df.loc[:,'Management fees'] = _revenue['management_fee']
+    df.loc[:,'On-going adviser charges'] = _revenue['pms_advice']
     df.loc[:,'HL Fund AMC'] = _revenue['hlf_amc']
     df.loc[:,'Stockbroking income'] = _revenue['stockbroking_commission'] + _revenue['stockbroking_income']
     df.loc[:,'Interest receivable'] = _revenue['interest_on_cash']
     df.loc[:,'Adviser charges'] = _revenue['advice_fee']
     df.loc[:,'Funds Library'] = _revenue['funds_library']
     df.loc[:,'Other income'] = _revenue['paper_income'] + _revenue['other_income']
-    df.loc[:,'Total revenue'] = df.sum(axis='columns')
+    df.loc[:,'Total net revenue'] = df.sum(axis='columns')
     
     df = general.convert_fy_quarter_half_index(df,_revenue.index)
     if type(year)==int:
