@@ -10,39 +10,54 @@ import consolidated
 idx = pandas.IndexSlice
 
 '''
-FY annual statistics
+Statistics
 '''
 
-def total_revenue(data_dic, input_dic, cal=False):
+def total_revenue(data_dic, input_dic, cal=False, semi=False):
     # including currency and interest on reserve
-    result = revenue.annual_revenue(data_dic,input_dic,cal).sum(axis='columns')
+    if semi:
+        result = revenue.semi_revenue(data_dic, input_dic).sum(axis='columns')
+    else:
+        result = revenue.annual_revenue(data_dic,input_dic,cal).sum(axis='columns')
     result.name = 'Total Revenue'
     return result
 
-def costs_no_capex(input_dic, cal=False):
-    result = costs.annual_costs(input_dic,cal).sum(axis='columns')-costs.annual_costs(input_dic,cal)['capital_expenditure']
+def costs_no_capex(input_dic, cal=False, semi=False):
+    if semi:
+        _costs = costs.semi_costs(input_dic)
+        result = _costs.sum(axis='columns') - _costs['capital_expenditure']
+    else:
+        _costs = costs.annual_costs(input_dic, cal)
+        result = _costs.sum(axis='columns') - _costs['capital_expenditure']
     result.name = 'Total Costs'
     return result
 
-def net_earning_before_tax(data_dic, input_dic, cal=False):
-    revenue = total_revenue(data_dic, input_dic, cal)
-    costs = costs_no_capex(input_dic, cal)
+def net_earning_before_tax(data_dic, input_dic, cal=False, semi=False):
+    revenue = total_revenue(data_dic, input_dic, cal, semi)
+    costs = costs_no_capex(input_dic, cal, semi)
     result = revenue + costs
     result.name = 'Net Earning Before Tax'
     return result
 
-def net_earning_after_tax(data_dic, input_dic, cal=False):
-    net_earning_bef_tax = net_earning_before_tax(data_dic, input_dic, cal)
-    tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(net_earning_bef_tax.index).fillna(method='ffill')['Tax']
-    result = net_earning_bef_tax*(1-tax_rate)
+def net_earning_after_tax(data_dic, input_dic, cal=False, semi=False):
+    net_earning_bef_tax = net_earning_before_tax(data_dic, input_dic, cal, semi)
+    if semi:
+        df_index = net_earning_bef_tax.index.get_level_values('financial_year')
+        tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(df_index).fillna(method='ffill')['Tax']
+        df_values = net_earning_bef_tax.values * (1 - tax_rate.values)
+        result = pandas.Series(df_values, index=net_earning_bef_tax.index)
+    else:
+        tax_rate = general.fillna_monthly(input_dic['tax rate']).reindex(net_earning_bef_tax.index).fillna(method='ffill')['Tax']
+        result = net_earning_bef_tax*(1-tax_rate)
+    
     result.name = 'Net Earning After Tax'
     return result
 
-def earning_per_share(data_dic, input_dic, cal=False):
+def earning_per_share(data_dic, input_dic, cal=False, semi=False):
     '''
     Capital expenditure is not included in the calculation
     '''
-    net_earning_af_tax = net_earning_after_tax(data_dic, input_dic, cal)
+    net_earning_af_tax = net_earning_after_tax(data_dic, input_dic, cal, semi)
     result = net_earning_af_tax / discf.no_of_shares
     result.name = 'EPS'
     return result
@@ -60,32 +75,36 @@ def total_aua(data_dic, input_dic):
     return result
 '''
 
-def summary_total(data_dic, input_dic, cal=False):
-    df1 = total_revenue(data_dic, input_dic, cal)
-    df2 = costs_no_capex(input_dic, cal)
-    df = net_earning_before_tax(data_dic, input_dic, cal)
-    df3 = net_earning_after_tax(data_dic, input_dic, cal)
-    df4 = earning_per_share(data_dic, input_dic, cal)
+def summary_total(data_dic, input_dic, cal=False, is_semi=False):
+    df1 = total_revenue(data_dic, input_dic, cal, is_semi)
+    df2 = costs_no_capex(input_dic, cal, is_semi)
+    df = net_earning_before_tax(data_dic, input_dic, cal, is_semi)
+    df3 = net_earning_after_tax(data_dic, input_dic, cal, is_semi)
+    df4 = earning_per_share(data_dic, input_dic, cal, is_semi)
     #df5 = total_aua(data_dic, input_dic)
     return pandas.concat([df1, df2, df, df3, df4],axis='columns')
 
-def summary_revenue_dist(data_dic, input_dic):
-    revenue_shares = revenue.annual_revenue(data_dic, input_dic)['management_fee']+revenue.annual_revenue(data_dic, input_dic)['stockbroking_commission']
+def summary_revenue_dist(data_dic, input_dic, is_semi=False):
+    if is_semi:
+        _revenue = revenue.semi_revenue(data_dic, input_dic)
+    else:
+        _revenue = revenue.annual_revenue(data_dic, input_dic)
+    revenue_shares = _revenue['management_fee']+_revenue['stockbroking_commission']
     revenue_shares.name = 'Shares'
-    revenue_funds = revenue.annual_revenue(data_dic, input_dic)['platform_fee']
+    revenue_funds = _revenue['platform_fee']
     revenue_funds.name = 'Funds'
-    revenue_hlf_amc = revenue.annual_revenue(data_dic, input_dic)['hlf_amc']
+    revenue_hlf_amc = _revenue['hlf_amc']
     revenue_hlf_amc.name = 'HLF AMC'
-    revenue_cash = revenue.annual_revenue(data_dic, input_dic)['interest_on_cash']
+    revenue_cash = _revenue['interest_on_cash']
     revenue_cash.name = 'Cash'
-    revenue_cash_service = revenue.annual_revenue(data_dic, input_dic)['cash_service']
+    revenue_cash_service = _revenue['cash_service']
     revenue_cash_service.name = 'Cash Service'
-    revenue_other = revenue.annual_revenue(data_dic, input_dic).drop(['management_fee','stockbroking_commission','platform_fee','hlf_amc','interest_on_cash','cash_service'], axis='columns').sum(axis='columns')
+    revenue_other = _revenue.drop(['management_fee','stockbroking_commission','platform_fee','hlf_amc','interest_on_cash','cash_service','currency_revenue','interest_on_reserve'], axis='columns').sum(axis='columns')
     revenue_other.name = 'Other'
     return pandas.concat([revenue_shares,revenue_funds,revenue_hlf_amc,revenue_cash,revenue_cash_service,revenue_other],axis='columns')
 
-def summary_revenue_dist_percent(data_dic, input_dic):
-    df = summary_revenue_dist(data_dic, input_dic)
+def summary_revenue_dist_percent(data_dic, input_dic, is_semi=False):
+    df = summary_revenue_dist(data_dic, input_dic, is_semi)
     return df.divide(df.sum(axis='columns'),axis='index')
 
 def summary_avg_aua_dist(data_dic, input_dic, period='financial_year'):
