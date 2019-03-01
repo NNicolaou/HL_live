@@ -246,7 +246,7 @@ def quarter_revenue(data_dic, input_dic):
     df['quarter_dist'] = df['half_no'].map(dic)
     df['quarter_no'] = df['half_no'].map(dic2)
     df['year_to_date_dist'] = df['half_no'].map(dic3)
-    df['Total quarter revenue'] = df['Total revenue'] * df['quarter_dist']
-    df['Year_to_date_revenue'] = ((df['Total revenue'] * df['year_to_date_dist']).shift(1)).fillna(0) + df['Total quarter revenue']
+    df['Total quarter revenue'] = df['Total net revenue'] * df['quarter_dist']
+    df['Year_to_date_revenue'] = ((df['Total net revenue'] * df['year_to_date_dist']).shift(1)).fillna(0) + df['Total quarter revenue']
     result = df[['quarter_no','financial_year','calendar_year','Total quarter revenue','Year_to_date_revenue']]
     return result.set_index(['quarter_no','financial_year','calendar_year']).iloc[idx[1::,:]]
