@@ -27,12 +27,12 @@ def disc_cash_flow(dic_data, input_dic, now=False, fractional=False, dcf_p=dcf_p
     if general.last_result_month == 6:
         df1 = consolidated.annual_revenue_analysis(dic_data, input_dic).loc[dcf_start:dcf_end,:]
         df2 = consolidated.annual_costs_analysis(input_dic).loc[dcf_start:dcf_end,:]
-        ebit = df1['Total revenue']+revenue.annual_revenue(dic_data, input_dic).loc[dcf_start:dcf_end,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic).loc[dcf_start:dcf_end,:]['currency_revenue'] 
+        ebit = df1['Total net revenue']+revenue.annual_revenue(dic_data, input_dic).loc[dcf_start:dcf_end,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic).loc[dcf_start:dcf_end,:]['currency_revenue'] 
         dcf = ebit.to_frame(name='EBIT').transpose()            
         dcf.loc['Depreciation',:] = -(costs.annual_costs(input_dic).loc[dcf_start:dcf_end,:]['depre_amort_financial'])
         dcf.loc['Capital Expenditure',:] = -(costs.annual_costs(input_dic).loc[dcf_start:dcf_end,:]['capital_expenditure'])
         if now is True:
-            dcf.loc['EBIT',dcf_start-1] = consolidated.convert_report_revenue_data(False, year=dcf_start-1).loc['Total revenue',dcf_start-1] + report_reformat('revenue').loc['interest_on_reserve'] + consolidated.convert_report_costs_data(False, year=dcf_start-1).loc['Total operating costs',dcf_start-1] + report_reformat('revenue').loc['currency_revenue']
+            dcf.loc['EBIT',dcf_start-1] = consolidated.convert_report_revenue_data(False, year=dcf_start-1).loc['Total net revenue',dcf_start-1] + report_reformat('revenue').loc['interest_on_reserve'] + consolidated.convert_report_costs_data(False, year=dcf_start-1).loc['Total operating costs',dcf_start-1] + report_reformat('revenue').loc['currency_revenue']
             dcf.loc['Depreciation', dcf_start-1] = -(report_reformat('costs').loc['depre_amort_financial'])
             dcf.loc['Capital Expenditure', dcf_start-1] = -(report_reformat('costs').loc['capital_expenditure'])
             dcf = dcf.sort_index(axis='columns')
@@ -43,12 +43,12 @@ def disc_cash_flow(dic_data, input_dic, now=False, fractional=False, dcf_p=dcf_p
     else:
         df1 = consolidated.annual_revenue_analysis(dic_data, input_dic, cal_year=True).loc[dcf_start:dcf_end,:]
         df2 = consolidated.annual_costs_analysis(input_dic,cal_year=True).loc[dcf_start:dcf_end,:]
-        ebit = df1['Total revenue']+revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['currency_revenue'] 
+        ebit = df1['Total net revenue']+revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['interest_on_reserve'] + df2['Total operating costs'] + revenue.annual_revenue(dic_data, input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['currency_revenue'] 
         dcf = ebit.to_frame(name='EBIT').transpose()
         dcf.loc['Depreciation',:] = -(costs.annual_costs(input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['depre_amort_financial'])
         dcf.loc['Capital Expenditure',:] = -(costs.annual_costs(input_dic,cal_year=True).loc[dcf_start:dcf_end,:]['capital_expenditure'])
         if now is True:
-            dcf.loc['EBIT',dcf_start-1] = consolidated.convert_report_revenue_data(False, year=dcf_start-1,cal_year=True).loc['Total revenue',dcf_start-1] + report_reformat('revenue',cal_year=True).loc['interest_on_reserve'] + consolidated.convert_report_costs_data(False, year=dcf_start-1,cal_year=True).loc['Total operating costs',dcf_start-1] + report_reformat('revenue',cal_year=True).loc['currency_revenue']
+            dcf.loc['EBIT',dcf_start-1] = consolidated.convert_report_revenue_data(False, year=dcf_start-1,cal_year=True).loc['Total net revenue',dcf_start-1] + report_reformat('revenue',cal_year=True).loc['interest_on_reserve'] + consolidated.convert_report_costs_data(False, year=dcf_start-1,cal_year=True).loc['Total operating costs',dcf_start-1] + report_reformat('revenue',cal_year=True).loc['currency_revenue']
             dcf.loc['Depreciation', dcf_start-1] = -(report_reformat('costs',cal_year=True).loc['depre_amort_financial'])
             dcf.loc['Capital Expenditure', dcf_start-1] = -(report_reformat('costs',cal_year=True).loc['capital_expenditure'])
             dcf = dcf.sort_index(axis='columns')
