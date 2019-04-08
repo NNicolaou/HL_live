@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql.dml import insert
 db_config = {'drivername': 'postgres',
              'username': 'postgres',
              'password': 'H0rAT10',
-             'host': 'WP-AP2',
+             'host': '172.20.20.31',
              'port': 5432}
 
 def as_list(x):
