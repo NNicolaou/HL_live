@@ -3,9 +3,13 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 import os
 from pandas.errors import EmptyDataError
+from numpy import nan
+from pandas import to_datetime, to_numeric, DataFrame
+import pygsheets
 
 SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 SPREADSHEET_ID = '1Efpnu_YVffR5Dtu6qO4RBgcjopsMWc3cTo7rk8j8VAY'
+
 def get_sheet_service_from_google_credentials(credentials_file_name: str='horatio_investments', generated_token_name: str='token'):
     dirname = os.path.dirname(__file__)
     token_file = os.path.join(dirname, generated_token_name + '.json')
@@ -109,6 +113,39 @@ def append_columns(sheet_id, values, range, sheets_service):
     return append_values(sheet_id=sheet_id, values=values, range=range, major_dimension='COLUMNS',
                          sheets_service=sheets_service, insertDataOption='INSERT_COLUMNS', valueInputOption='USER_ENTERED')
 
+def load_parameters_as_df(tab_name):
+    response = get_range_values(tab_name, SPREADSHEET_ID, parameter_sheet_service, start_row_number=1,
+                                end_row_number=1000)
+    parameter_df = DataFrame(response)
+    parameter_df.set_index(0, inplace=True)
+    column_list = list(parameter_df.iloc[0, :])
+    parameter_df.columns = column_list
+    parameter_df = parameter_df.iloc[1:, :]
+    if tab_name != 'tax rate' and tab_name != 'nnb pcent total asset':
+        parameter_df.index = to_datetime(parameter_df.index)
+    else:
+        parameter_df.index = parameter_df.index.astype(int)
+    del parameter_df.index.name
+    for columns in parameter_df:
+        parameter_df[columns] = to_numeric(parameter_df[columns], errors='coerce')
+    parameter_df.sort_index(axis='columns',inplace=True)
+    return parameter_df
+
+# dirname = os.path.dirname(__file__)
+# json_token_name = 'horatio_investments.json'
+# sheet_client = pygsheets.authorize(credentials_directory=dirname, client_secret=json_token_name)
+# work_sheet = sheet_client.open_by_key(SPREADSHEET_ID)
+#
+# def load_parameters_as_df(tab_name):
+#     tab_object = work_sheet.worksheet_by_title(tab_name)
+#     data_df = tab_object.get_as_df(empty_value=nan, include_tailing_empty=False)
+#     data_df = data_df.drop_duplicates(keep=False)
+#     data_df = data_df.set_index(nan)
+#     del data_df.index.name
+#     if tab_name != 'tax rate' and tab_name != 'nnb pcent total asset':
+#         data_df.index = to_datetime(data_df.index)
+#     data_df.sort_index(axis='columns',inplace=True)
+#     return data_df
+
 if __name__ == '__main__':
-    print(get_range_values('nnb distribution', SPREADSHEET_ID, parameter_sheet_service, start_column_letter='A',
-                     end_column_letter='J'))
+    pass

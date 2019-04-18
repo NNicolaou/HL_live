@@ -1,5 +1,6 @@
 from pandas import read_excel, to_datetime
 from data_access.query import DatabaseQuery, db_config
+from parameters import load_parameters_as_df
 
 data_service = DatabaseQuery(**db_config)
 
@@ -27,6 +28,13 @@ def read_data(data_name, sheets):
             dic[items] = read_excel(data_name, items)
             dic[items].sort_index(axis='columns',inplace=True)
         return dic.copy()
+
+def read_assumptions_from_google_sheet(tabs=assumptions_sheet):
+    dic ={}
+    for tab in tabs:
+        dic[tab] = load_parameters_as_df(tab)
+    return dic.copy()
+
 
 def append_fund_size(dic_data):
     dic_data['fund size'] = dic_data['acc size'] + dic_data['inc size']
@@ -59,7 +67,8 @@ def pull_data_for_model(from_dt=None):
     append_share_class_units(data_dic)
     return data_dic.copy()
 
-
+if __name__ == '__main__':
+    dic = read_assumptions_from_google_sheet()
 
 
 
