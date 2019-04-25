@@ -148,4 +148,4 @@ def load_parameters_as_df(tab_name):
 #     return data_df
 
 if __name__ == '__main__':
-    pass
+    load_parameters_as_df('aua margin')
