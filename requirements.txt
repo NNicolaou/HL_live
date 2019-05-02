@@ -4,8 +4,9 @@ jupyter==1.0.0
 matplotlib==3.0.2
 pandas==0.22.0
 xlrd==1.2.0
-SQLAlchemy
-psycopg2
-google-api-python-client==1.7.4
-oauth2client==4.1.3
+SQLAlchemy>=1.3.0
+psycopg2==2.8.2
+google-api-python-client==1.7.8
+google-auth-oauthlib==0.2.0
+google-auth-httplib2==0.0.3
 pygsheets==2.0.1

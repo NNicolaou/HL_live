@@ -1,27 +1,63 @@
 from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
+from contextlib import contextmanager
+import pickle
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 import os
 from pandas.errors import EmptyDataError
 from numpy import nan
 from pandas import to_datetime, to_numeric, DataFrame
 import pygsheets
 
-SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 SPREADSHEET_ID = '1Efpnu_YVffR5Dtu6qO4RBgcjopsMWc3cTo7rk8j8VAY'
 
-def get_sheet_service_from_google_credentials(credentials_file_name: str='horatio_investments', generated_token_name: str='token'):
-    dirname = os.path.dirname(__file__)
-    token_file = os.path.join(dirname, generated_token_name + '.json')
-    credentials_file = os.path.join(dirname, credentials_file_name + '.json')
+@contextmanager
+def cwd(path):
+    oldpwd=os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(oldpwd)
 
-    google_store = file.Storage(token_file)
-    google_creds = google_store.get()
-    if not google_creds or google_creds.invalid:
-        flow = client.flow_from_clientsecrets(credentials_file, SCOPES)
-        google_creds = tools.run_flow(flow, google_store)
-    sheets_service = build('sheets', 'v4', http=google_creds.authorize(Http()))
+
+def get_sheet_service_from_google_credentials(credentials_file_name: str='horatio_investments',
+                                              generated_token_name: str='token'):
+
+    dirname = os.path.dirname(__file__)
+
+    creds = None
+
+    # The file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    token_name = generated_token_name + '.pickle'
+    with cwd(dirname):
+        if os.path.exists(token_name):
+            with open(token_name, 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credentials_file_name + '.json', SCOPES)
+                # authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+
+                # Enable offline access so that you can refresh an access token without
+                # re-prompting the user for permission. Recommended for web server apps.
+                # Enable incremental authorization. Recommended as a best practice. - include_granted_scopes
+                creds = flow.run_local_server(access_type='offline', include_granted_scopes='true')
+
+            # Save the credentials for the next run
+            with open(token_name, 'wb') as token:
+                pickle.dump(creds, token)
+
+    sheets_service = build('sheets', 'v4', credentials=creds)
     return sheets_service
+
 
 parameter_sheet_service = get_sheet_service_from_google_credentials()
 
@@ -148,4 +184,4 @@ def load_parameters_as_df(tab_name):
 #     return data_df
 
 if __name__ == '__main__':
-    load_parameters_as_df('aua margin')
+    print(load_parameters_as_df('aua margin'))
