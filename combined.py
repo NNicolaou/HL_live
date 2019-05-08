@@ -77,10 +77,10 @@ def get_historic_implied_nnb(dic_data,idx=general.month_end_series,funds_opt=Non
     dictionary of data
     '''
     if funds_opt=='no_select':
-        mod_acc_price = dic_data['acc price'].drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
-        mod_inc_price = dic_data['inc price'].drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
-        mod_acc_size = dic_data['acc size'].drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
-        mod_inc_size = dic_data['inc size'].drop(['Select UK Growth Shares', 'Select UK Income Shares'], axis='columns')
+        mod_acc_price = dic_data['acc price'].drop(['Select UK Growth Shares', 'Select UK Income Shares', 'Select Global Growth Shares'], axis='columns')
+        mod_inc_price = dic_data['inc price'].drop(['Select UK Growth Shares', 'Select UK Income Shares', 'Select Global Growth Shares'], axis='columns')
+        mod_acc_size = dic_data['acc size'].drop(['Select UK Growth Shares', 'Select UK Income Shares', 'Select Global Growth Shares'], axis='columns')
+        mod_inc_size = dic_data['inc size'].drop(['Select UK Growth Shares', 'Select UK Income Shares', 'Select Global Growth Shares'], axis='columns')
     else:
         mod_acc_price = dic_data['acc price']
         mod_inc_price = dic_data['inc price']
