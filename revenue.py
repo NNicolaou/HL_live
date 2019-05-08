@@ -76,9 +76,9 @@ def hlf_daily_fund_size(dic_data, input_dic, period=None):
 
 def hlf_daily_revenue(dic_data, input_dic, period=None):
     final_fund_size = hlf_daily_fund_size(dic_data, input_dic)           
-    select_revenue = final_fund_size[['Select UK Growth Shares','Select UK Income Shares']].sum(axis='columns')
+    select_revenue = final_fund_size[['Select UK Growth Shares','Select UK Income Shares','Select Global Growth Shares']].sum(axis='columns')
     select_revenue = select_revenue*(0.006/365)
-    hlf_revenue = final_fund_size.drop(['Select UK Growth Shares','Select UK Income Shares'], axis='columns').sum(axis='columns')
+    hlf_revenue = final_fund_size.drop(['Select UK Growth Shares','Select UK Income Shares','Select Global Growth Shares'], axis='columns').sum(axis='columns')
     hlf_revenue = hlf_revenue*(0.0075/365)              
     total_hlf = select_revenue+hlf_revenue
     total_hlf.name='hlf_revenue'              

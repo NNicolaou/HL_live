@@ -14,9 +14,9 @@ db_config = {'drivername': 'postgres',
              'port': 5432}
 
 def as_list(x):
-    if type(x) == str or type(x) == dict:
+    if isinstance(x, str) or isinstance(x, dict):
         return [x]
-    elif type(x) == tuple:
+    elif isinstance(x, tuple):
         return list(x)
     else:
         return [x]
