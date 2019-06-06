@@ -149,12 +149,15 @@ def hlf_implied_actual_nnb(data_dic, input_dic):
     result = general.convert_fy_quarter_half_index(hlf_nnb,hlf_nnb.index)
     return result
 
-def hlf_to_date_implied_nnb(data_dic,typ=None, fund_opt=None):
+def hlf_to_date_implied_nnb(data_dic,typ=None, fund_opt=None, total=True):
     '''
     typ: 'day','month','quarter','annual'
     '''
-    df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index, funds_opt=fund_opt)
-    df.name = 'HLF nnb'
+    if total:
+        df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index, funds_opt=fund_opt)
+        df.name = 'HLF nnb'
+    else:
+        df = combined.get_historic_implied_nnb(data_dic,idx=data_dic['acc price'].index, funds_opt=fund_opt, total=total)
     df2 = general.convert_fy_quarter_half_index(df,df.index)
     #df2 = df2.reset_index()
     #df2.loc[:,'month_no'] = pandas.DatetimeIndex(df2['month_end']).month
