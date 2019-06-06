@@ -71,7 +71,7 @@ def get_total_asset_nnb(dic_data, input_dic):
     future_total_asset_nnb = sliced_aua.loc[:,general.disc_known_cols].sum(axis='columns') + sliced_aua.loc[:,general.vantage_known_cols].sum(axis='columns')
     return future_total_asset_nnb
 
-def get_historic_implied_nnb(dic_data,idx=general.month_end_series,funds_opt=None):
+def get_historic_implied_nnb(dic_data,idx=general.month_end_series,funds_opt=None,total=True):
     '''
     Return a series of total historic implied nnb which is the sum of all the funds in HL
     dictionary of data
@@ -100,7 +100,10 @@ def get_historic_implied_nnb(dic_data,idx=general.month_end_series,funds_opt=Non
     acc_nnb = (acc_size_change - acc_bid_return) * acc_size.shift(1)
     inc_nnb = (inc_size_change - inc_bid_return) * inc_size.shift(1)
     
-    total_nnb = acc_nnb.sum(axis='columns') + inc_nnb.sum(axis='columns')
+    if total:
+        total_nnb = acc_nnb.sum(axis='columns') + inc_nnb.sum(axis='columns')
+    else:
+        total_nnb = acc_nnb + inc_nnb
     return total_nnb
 
 
@@ -308,7 +311,7 @@ def total_aua(dic_data, input_dic):
     final_aua.loc[:,'total_funds_aua'] = final_aua.loc[:,'vantage_hlf_aua'] + final_aua.loc[:,'vantage_other_funds_aua'] + final_aua.loc[:,'pms_hlf_aua']
     
     
-    def cash_aua_temp(df, y2=80000000):
+    def cash_aua_temp(df, y2=98000000):
         test = df['cash_service_aua'].copy()
         
         test[(test.index>'2018-12-31')] = y2 
