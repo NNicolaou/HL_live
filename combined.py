@@ -103,7 +103,7 @@ def get_historic_implied_nnb(dic_data,idx=general.month_end_series,funds_opt=Non
     if total:
         total_nnb = acc_nnb.sum(axis='columns') + inc_nnb.sum(axis='columns')
     else:
-        total_nnb = acc_nnb + inc_nnb
+        total_nnb = acc_nnb.fillna(0) + inc_nnb.fillna(0)
     return total_nnb
 
 
