@@ -5,6 +5,7 @@ import discretionary_aua
 import vantage_aua
 
 idx = pandas.IndexSlice
+nnc_nnb_multiple_factor = 0.8
 
 def historic_aua(dic_data):
     dis = discretionary_aua.compute_historic_aua(dic_data)
@@ -261,7 +262,7 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
     nnb_c = nnb['NNB'].copy()
     for j in range(1,nnb_c.size):
         if numpy.isnan(nnb_c.iloc[j]) & ~numpy.isnan(nnb_c.iloc[j-1]):
-            nnb_c.iloc[j] = (nnb_c.iloc[j-1] * (1+(0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
+            nnb_c.iloc[j] = (nnb_c.iloc[j-1] * (1+(nnc_nnb_multiple_factor*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
     
     # converting quarter nnb to monthly
     df = convert_quarter_to_month_nnb(nnb_c)
