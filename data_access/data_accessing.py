@@ -29,10 +29,10 @@ def read_data(data_name, sheets):
             dic[items].sort_index(axis='columns',inplace=True)
         return dic.copy()
 
-def read_assumptions_from_google_sheet(tabs=assumptions_sheet):
+def read_assumptions_from_google_sheet(spreadsheet_id, tabs=assumptions_sheet):
     dic ={}
     for tab in tabs:
-        dic[tab] = load_parameters_as_df(tab)
+        dic[tab] = load_parameters_as_df(spreadsheet_id, tab)
     return dic.copy()
 
 
