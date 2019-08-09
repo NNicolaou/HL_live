@@ -81,7 +81,7 @@ def hlf_daily_revenue(dic_data, input_dic, period=None):
     hlf_revenue = final_fund_size.drop(['Select UK Growth Shares','Select UK Income Shares','Select Global Growth Shares'], axis='columns').sum(axis='columns')
     hlf_revenue_s1 = hlf_revenue[hlf_revenue.index < '2019-10-01']*(0.0075/365)
     hlf_revenue_s2 = hlf_revenue[hlf_revenue.index >= '2019-10-01']*(0.006/365)
-    hlf_revenue = hlf_revenue_s1.append(hlf_revenue_s2)        
+    hlf_revenue = hlf_revenue_s1.append(hlf_revenue_s2)
     total_hlf = select_revenue+hlf_revenue
     total_hlf.name='hlf_revenue'              
     result = general.convert_fy_quarter_half_index(total_hlf,total_hlf.index)
