@@ -10,7 +10,6 @@ from pandas import to_datetime, to_numeric, DataFrame
 import pygsheets
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-SPREADSHEET_ID = '1Efpnu_YVffR5Dtu6qO4RBgcjopsMWc3cTo7rk8j8VAY'
 
 @contextmanager
 def cwd(path):
@@ -149,8 +148,8 @@ def append_columns(sheet_id, values, range, sheets_service):
     return append_values(sheet_id=sheet_id, values=values, range=range, major_dimension='COLUMNS',
                          sheets_service=sheets_service, insertDataOption='INSERT_COLUMNS', valueInputOption='USER_ENTERED')
 
-def load_parameters_as_df(tab_name):
-    response = get_range_values(tab_name, SPREADSHEET_ID, parameter_sheet_service, start_row_number=1,
+def load_parameters_as_df(spreadsheet_id, tab_name):
+    response = get_range_values(tab_name, spreadsheet_id, parameter_sheet_service, start_row_number=1,
                                 end_row_number=1000)
     parameter_df = DataFrame(response)
     parameter_df.set_index(0, inplace=True)

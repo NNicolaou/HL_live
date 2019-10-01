@@ -315,11 +315,11 @@ def total_aua(dic_data, input_dic):
     def cash_aua_temp(df, y2=98000000):
         test = df['cash_service_aua'].copy()
         
-        test[(test.index>'2018-12-31')] = y2 
+        test[(test.index>'2019-06-28')] = y2 
         
-        test[(test.index>'2019-06-28')] = 160000000
-        test[(test.index>'2020-06-30')] = 320000000
-        test[(test.index>'2021-06-30')] = 480000000
+        test[(test.index>'2020-06-28')] = 160000000
+        test[(test.index>'2021-06-30')] = 320000000
+        test[(test.index>'2022-06-30')] = 480000000
         return test.cumsum()
     
     cash_temp = cash_aua_temp(final_aua)
