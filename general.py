@@ -33,9 +33,9 @@ fund_fx_cols = ['GBPGBP', 'GBPEUR', 'GBPUSD', 'GBPJPY', 'GBPCNY', 'GBPAUD','GBPN
 
 nnb_quarterly_dist = {1:0.18, 2:0.18, 3:0.385, 4:0.255}
 
-account_cash_dist = {'sipp': 0.5188, 'isa': 0.3147, 'f&s': 0.1665}
+account_cash_dist = {'sipp': 0.5, 'isa': 0.28125, 'f&s': 0.21875}
 account_aua_dist = {'sipp': 0.34, 'isa': 0.40, 'f&s': 0.26}
-account_dist = {'sipp': 0.2728, 'isa': 0.5057, 'f&s': 0.2215}
+account_dist = {'sipp': 0.2682, 'isa': 0.5090, 'f&s': 0.2228}
 
 management_fee_cap_per_year = {'sipp': 200, 'isa': 50}
 management_fee_as_percent_max_fee = 0.2025
