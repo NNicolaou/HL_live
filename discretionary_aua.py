@@ -1,5 +1,7 @@
 import pandas
 import general
+import datetime
+import numpy
 idx = pandas.IndexSlice
 
 
@@ -39,9 +41,21 @@ def get_acc_composite_mul(dic_data):
     return result
 
 def compute_historic_aua(dic_data, df=aua_frame):
+    test = dic_data['fund size']
+    daily_fund_size = test.reindex(index=pandas.date_range(test.index.min(), general.month_end_series.max()))
+    daily_fund_size = daily_fund_size.fillna(method='ffill')
+    daily_fund_size[(daily_fund_size.index >= datetime.datetime.today())] = numpy.nan
+    daily_fund_size = daily_fund_size.sum(axis='columns')
+    current_fund_size = daily_fund_size.reindex(index=df.iloc[1:].index)
+    total_last_result_size = df.iloc[0, :].sum() - df.iloc[0, :]['pms_others_aua']
+    proportion_dic = {}
+    for aua_type in ['pms_hlf_aua', 'vantage_hlf_aua', 'thirdparty_hlf_aua']:
+        proportion_dic[aua_type] = df.iloc[0, :][aua_type] / total_last_result_size
+
+    final_aua = df.copy()
+    for aua_type, proportion in proportion_dic.items():
+        final_aua.loc[1:, aua_type] = current_fund_size * proportion
+
     composite_mul = get_acc_composite_mul(dic_data)
-    final_aua = df.fillna(method='ffill').loc[:,general.hlf_known_cols].multiply(composite_mul,axis='index')
-    srs = df['pms_others_aua'].fillna(method='ffill').multiply(composite_mul.where(composite_mul.isnull(),1.0))
-    final_aua.loc[:,'pms_others_aua'] = srs
-    return final_aua
-    
+    result = final_aua.fillna(method='ffill').multiply(composite_mul.where(composite_mul.isnull(), 1.0), axis='index')
+    return result
