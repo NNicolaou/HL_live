@@ -5,7 +5,14 @@ import discretionary_aua
 import vantage_aua
 
 idx = pandas.IndexSlice
-nnc_nnb_multiple_factor = 0.8
+nnc_nnb_multiple_factor = 0.035
+nnc_nnb_intercept_factor = 631.8
+
+# ==== 95% Confidence interval ====
+nnc_nnb_multiple_ci_upper = 0.0447
+nnc_nnb_multiple_ci_lower = 0.0252
+nnc_nnb_intercept_ci_upper = 929.833
+nnc_nnb_intercept_ci_lower =333.7678
 
 def historic_aua(dic_data):
     dis = discretionary_aua.compute_historic_aua(dic_data)
@@ -200,14 +207,14 @@ def total_nnb_ci_clientAlgo(dic_data, input_dic, opt=None):
     
     for j in range(1,nnb.index.size):
         if numpy.isnan(nnb.iloc[j,0]) & ~numpy.isnan(nnb.iloc[j-1,0]):
-            nnb.iloc[j,0] = (nnb.iloc[j-1,0] * (1+(0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
+            nnb.iloc[j,0] = (net_new_clients.iloc[j] * nnc_nnb_multiple_factor + nnc_nnb_intercept_factor) * 1000000
     for j in range(1,nnb.index.size):
         if numpy.isnan(nnb.iloc[j,1]) & ~numpy.isnan(nnb.iloc[j-1,1]):
-            nnb.iloc[j,1] = (nnb.iloc[j-1,0] * (1+((0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))-2*0.0618)))
+            nnb.iloc[j,1] = (net_new_clients.iloc[j] * nnc_nnb_multiple_ci_lower + nnc_nnb_intercept_ci_lower) * 1000000
     
     for j in range(1,nnb.index.size):
         if numpy.isnan(nnb.iloc[j,2]) & ~numpy.isnan(nnb.iloc[j-1,2]):
-            nnb.iloc[j,2] = (nnb.iloc[j-1,0] * (1+((0.7*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))+2*0.0618)))
+            nnb.iloc[j,2] = (net_new_clients.iloc[j] * nnc_nnb_multiple_ci_upper + nnc_nnb_intercept_ci_upper) * 1000000
     
     df = convert_quarter_to_month_nnb(nnb, opt='Confidence interval')
     if opt is None:
@@ -262,7 +269,7 @@ def total_nnb_clientAlgo(dic_data, input_dic, opt=None):
     nnb_c = nnb['NNB'].copy()
     for j in range(1,nnb_c.size):
         if numpy.isnan(nnb_c.iloc[j]) & ~numpy.isnan(nnb_c.iloc[j-1]):
-            nnb_c.iloc[j] = (nnb_c.iloc[j-1] * (1+(nnc_nnb_multiple_factor*(net_new_clients.iloc[j]/net_new_clients.iloc[j-1]-1))))
+            nnb_c.iloc[j] = (net_new_clients.iloc[j] * nnc_nnb_multiple_factor + nnc_nnb_intercept_factor) * 1000000
     
     # converting quarter nnb to monthly
     df = convert_quarter_to_month_nnb(nnb_c)
